@@ -1,0 +1,4 @@
+#Wed Jun 28 07:58:50 BRT 2023
+base.0=C\:\\PROJETO\\TeamGenerator\\build\\app\\intermediates\\dex\\debug\\mergeDexDebug\\classes.dex
+path.0=classes.dex
+renamed.0=classes.dex
