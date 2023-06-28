@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:groupapp/models/pessoa.dart';
 
 class PessoaForm extends StatefulWidget {
   final void Function(String, double) onSubmit;
+  final List<Pessoa> pessoas;
 
-  PessoaForm(this.onSubmit, {super.key});
+  const PessoaForm(this.onSubmit, this.pessoas, {super.key});
 
   @override
   State<PessoaForm> createState() => _PessoaFormState();
@@ -19,6 +21,12 @@ class _PessoaFormState extends State<PessoaForm> {
     final nivel = nivelStar;
     if (nome.isEmpty || nivel <= 0) {
       return;
+    }
+
+    for (Pessoa element in widget.pessoas) {
+      if (element.nome == nome) {
+        return;
+      }
     }
 
     widget.onSubmit(nome, nivel);

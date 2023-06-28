@@ -1,7 +1,7 @@
 class Pessoa {
   final String? id;
   final String? nome;
-  final double? nivel;
+  double? nivel;
   bool coringa;
   bool serSorteada;
 
