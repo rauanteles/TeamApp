@@ -15,14 +15,14 @@ class PessoaList extends StatefulWidget {
 }
 
 class _PessoaListState extends State<PessoaList> {
-  List<Pessoa> pessoas = [];
-  _addPessoa(String nome, double nivel) {
+  static List<Pessoa> pessoas = [];
+  addPessoa(String nome, double nivel) {
     final newPessoa = Pessoa(
       id: Random().nextDouble().toString(),
       nome: nome,
       nivel: nivel,
       coringa: false,
-      serSorteada: false,
+      selecionado: false,
     );
 
     setState(() {
@@ -45,46 +45,52 @@ class _PessoaListState extends State<PessoaList> {
       builder: (_) {
         return FractionallySizedBox(
           heightFactor: 0.68,
-          child: (PessoaForm(_addPessoa, pessoas)),
+          child: (PessoaForm(addPessoa, pessoas)),
         );
       },
     );
   }
 
   bool checkedJoker = false;
-  bool serSorteado = false;
+  bool selecionado = false;
+  bool filterList = false;
+
   int qntSelecionada = 0;
   late String swipeDirection;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Center(child: Text('Team Generator')),
-        backgroundColor: Colors.purple,
-      ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
+          //
+          //INFO DAS LISTAS
+          //
+
           const SizedBox(
             width: double.infinity,
             child: Card(
               color: Color.fromARGB(255, 18, 1, 65),
               elevation: 10,
               child: Text(
-                'Número de Jogadores',
+                'JOGADORES',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
               ),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(left: 15, right: 15),
+            padding: const EdgeInsets.only(left: 8, right: 8),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   'Total: ${pessoas.length} ',
+                ),
+                const Text(
+                  'Double Click for captain',
+                  style: TextStyle(color: Colors.grey),
                 ),
                 Text(
                   'Selecionados: $qntSelecionada',
@@ -93,48 +99,29 @@ class _PessoaListState extends State<PessoaList> {
               ],
             ),
           ),
-          const SizedBox(
-            height: 35,
-            width: double.infinity,
-            child: Card(
-              color: Colors.purple,
-              elevation: 5,
-              child: Center(
-                child: Text(
-                  'Lista de Jogadores',
-                  style: TextStyle(color: Colors.white, fontSize: 25),
-                ),
-              ),
-            ),
-          ),
-          const Center(
-            child: Text(
-              'Double Click for captain',
-              textAlign: TextAlign.start,
-              style: TextStyle(color: Colors.grey),
-            ),
-          ),
+
+          //INICIO DA LISTA
+
           Expanded(
             child: ListView.builder(
-              itemCount: pessoas.length,
+              itemCount: (filterList ? listarOrdenado() : pessoas).length,
               itemBuilder: (_, int index) {
-                Pessoa c = pessoas[index];
+                Pessoa c = (filterList ? listarOrdenado() : pessoas)[index];
                 return cardModel(c);
               },
             ),
           )
         ],
       ),
-      //
-      //
-      //
-      // NAVEGATION BAR
-      //
+
+      // NAV BAR
+      //BOTÃO RANDOM
       floatingActionButton: FloatingActionButton(
         onPressed: () {},
         backgroundColor: Colors.blue,
         child: const Icon(Icons.shuffle),
       ),
+      //BOTOES SECUNDARIOS
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(
         color: Colors.purple,
@@ -146,7 +133,7 @@ class _PessoaListState extends State<PessoaList> {
           children: <Widget>[
             IconButton(
                 icon: const Icon(
-                  Icons.menu,
+                  Icons.search,
                   color: Colors.white,
                 ),
                 onPressed: () {}),
@@ -165,10 +152,13 @@ class _PessoaListState extends State<PessoaList> {
             ),
             IconButton(
                 icon: const Icon(
-                  Icons.favorite_outline,
+                  Icons.filter_list_rounded,
                   color: Colors.white,
                 ),
-                onPressed: () {}),
+                onPressed: () {
+                  filterList = !filterList;
+                  setState(() {});
+                }),
           ],
         ),
       ),
@@ -192,7 +182,7 @@ class _PessoaListState extends State<PessoaList> {
             SlidableAction(
               onPressed: ((context) {
                 _removePessoa(cd.id!);
-                cd.serSorteada ? qntSelecionada-- : null;
+                cd.selecionado ? qntSelecionada-- : null;
               }),
               backgroundColor: const Color(0xFFFE4A49),
               foregroundColor: Colors.white,
@@ -257,12 +247,12 @@ class _PessoaListState extends State<PessoaList> {
 
             trailing: InkWell(
               onTap: () {
-                cd.serSorteada = !cd.serSorteada;
-                cd.serSorteada ? qntSelecionada++ : qntSelecionada--;
+                cd.selecionado = !cd.selecionado;
+                cd.selecionado ? qntSelecionada++ : qntSelecionada--;
                 setState(() {});
               },
               child: Builder(builder: (context) {
-                if (cd.serSorteada) {
+                if (cd.selecionado) {
                   return Icon(
                     Icons.check_circle,
                     color: cd.coringa ? Colors.white : Colors.black,
@@ -279,5 +269,13 @@ class _PessoaListState extends State<PessoaList> {
         ),
       ),
     );
+  }
+
+  //ORDENA QUEM TA MARCADO PARA CIMA
+  //
+  List<Pessoa> listarOrdenado() {
+    pessoas
+        .sort((a, b) => a.selecionado ? 0 : 1.compareTo(b.selecionado ? 0 : 1));
+    return pessoas;
   }
 }

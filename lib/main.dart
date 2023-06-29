@@ -22,6 +22,15 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
-    return const PessoaList();
+    return Scaffold(
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(40.0),
+        child: AppBar(
+          title: const Center(child: Text('Team Generator')),
+          backgroundColor: Colors.purple,
+        ),
+      ),
+      body: const PessoaList(),
+    );
   }
 }

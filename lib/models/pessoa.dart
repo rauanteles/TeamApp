@@ -3,13 +3,13 @@ class Pessoa {
   final String? nome;
   double? nivel;
   bool coringa;
-  bool serSorteada;
+  bool selecionado;
 
   Pessoa({
     required this.id,
     required this.nome,
     required this.nivel,
     required this.coringa,
-    required this.serSorteada,
+    required this.selecionado,
   });
 }
