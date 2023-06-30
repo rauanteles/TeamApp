@@ -15,6 +15,11 @@ class PessoaList extends StatefulWidget {
 }
 
 class _PessoaListState extends State<PessoaList> {
+  bool checkedJoker = false;
+  bool selecionado = false;
+  bool filterList = false;
+  int qtdSelecionada = 0;
+
   static List<Pessoa> pessoas = [];
   addPessoa(String nome, double nivel) {
     final newPessoa = Pessoa(
@@ -22,12 +27,20 @@ class _PessoaListState extends State<PessoaList> {
       nome: nome,
       nivel: nivel,
       coringa: false,
-      selecionado: false,
+      selecionado: true,
     );
 
     setState(() {
       pessoas.add(newPessoa);
     });
+
+    int x = 0;
+    for (Pessoa p in pessoas) {
+      if (p.selecionado) {
+        x++;
+      }
+    }
+    qtdSelecionada = x;
   }
 
   _removePessoa(String id) {
@@ -51,50 +64,60 @@ class _PessoaListState extends State<PessoaList> {
     );
   }
 
-  bool checkedJoker = false;
-  bool selecionado = false;
-  bool filterList = false;
-
-  int qntSelecionada = 0;
   late String swipeDirection;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
         mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           //
           //INFO DAS LISTAS
           //
 
-          const SizedBox(
-            width: double.infinity,
-            child: Card(
-              color: Color.fromARGB(255, 18, 1, 65),
-              elevation: 10,
-              child: Text(
-                'JOGADORES',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              SizedBox(
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 25.0),
+                  child: Text(
+                    'Total: ${pessoas.length} ',
+                  ),
+                ),
               ),
-            ),
+              const SizedBox(
+                width: 100,
+                height: 30,
+                child: Card(
+                  color: Color.fromARGB(255, 18, 1, 65),
+                  elevation: 5,
+                  child: Center(
+                    child: Text(
+                      'PLAYERS',
+                      style:
+                          TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
+                    ),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(right: 8.0),
+                child: Text(
+                  'Selected: $qtdSelecionada',
+                  textAlign: TextAlign.end,
+                ),
+              ),
+            ],
           ),
-          Padding(
-            padding: const EdgeInsets.only(left: 8, right: 8),
+          const Padding(
+            padding: EdgeInsets.only(left: 8, right: 8),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 Text(
-                  'Total: ${pessoas.length} ',
-                ),
-                const Text(
                   'Double Click for captain',
                   style: TextStyle(color: Colors.grey),
-                ),
-                Text(
-                  'Selecionados: $qntSelecionada',
-                  textAlign: TextAlign.end,
                 ),
               ],
             ),
@@ -182,7 +205,7 @@ class _PessoaListState extends State<PessoaList> {
             SlidableAction(
               onPressed: ((context) {
                 _removePessoa(cd.id!);
-                cd.selecionado ? qntSelecionada-- : null;
+                cd.selecionado ? qtdSelecionada-- : null;
               }),
               backgroundColor: const Color(0xFFFE4A49),
               foregroundColor: Colors.white,
@@ -248,7 +271,7 @@ class _PessoaListState extends State<PessoaList> {
             trailing: InkWell(
               onTap: () {
                 cd.selecionado = !cd.selecionado;
-                cd.selecionado ? qntSelecionada++ : qntSelecionada--;
+                cd.selecionado ? qtdSelecionada++ : qtdSelecionada--;
                 setState(() {});
               },
               child: Builder(builder: (context) {
@@ -272,7 +295,6 @@ class _PessoaListState extends State<PessoaList> {
   }
 
   //ORDENA QUEM TA MARCADO PARA CIMA
-  //
   List<Pessoa> listarOrdenado() {
     pessoas
         .sort((a, b) => a.selecionado ? 0 : 1.compareTo(b.selecionado ? 0 : 1));
