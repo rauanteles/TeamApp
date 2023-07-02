@@ -20,7 +20,8 @@ class _PessoaListState extends State<PessoaList> {
   bool filterList = false;
   int qtdSelecionada = 0;
   late String swipeDirection;
-  TextEditingController editingController = TextEditingController();
+  TextEditingController controller = TextEditingController();
+  List<Pessoa> pessoa = pessoas;
 
   static List<Pessoa> pessoas = [];
   addPessoa(String nome, double nivel) {
@@ -96,14 +97,16 @@ class _PessoaListState extends State<PessoaList> {
                   height: 35,
                   width: 200,
                   child: TextField(
-                    controller: editingController,
+                    controller: controller,
                     decoration: const InputDecoration(
                         labelText: "Players",
                         hintText: "Search",
+                        hintStyle: TextStyle(height: 3.2),
                         prefixIcon: Icon(Icons.search),
                         border: OutlineInputBorder(
                             borderRadius:
                                 BorderRadius.all(Radius.circular(25.0)))),
+                    onChanged: searchPessoa,
                   ),
                 ),
               ),
@@ -305,5 +308,16 @@ class _PessoaListState extends State<PessoaList> {
     pessoas
         .sort((a, b) => a.selecionado ? 0 : 1.compareTo(b.selecionado ? 0 : 1));
     return pessoas;
+  }
+
+  void searchPessoa(String query) {
+    final suggestions = pessoa.where((pessoas) {
+      final pessoasNome = pessoas.nome!.toLowerCase();
+      final input = query.toLowerCase();
+      return pessoasNome.contains(input);
+    }).toList();
+    setState(() {
+      pessoas = suggestions;
+    });
   }
 }

@@ -1,4 +1,4 @@
-#Sat Jul 01 23:41:15 BRT 2023
+#Sun Jul 02 02:47:14 BRT 2023
 base.0=C\:\\Projeto\\TeamApp\\build\\app\\intermediates\\dex\\debug\\mergeDexDebug\\classes.dex
 path.0=classes.dex
 renamed.0=classes.dex
