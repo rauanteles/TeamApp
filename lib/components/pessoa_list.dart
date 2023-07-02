@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+
 import 'package:groupapp/components/pessoa_form.dart';
 
 import '../models/pessoa.dart';
@@ -62,6 +63,74 @@ class _PessoaListState extends State<PessoaList> {
         return FractionallySizedBox(
           heightFactor: 0.68,
           child: (PessoaForm(addPessoa, pessoas)),
+        );
+      },
+    );
+  }
+
+  _openFuncoesBottonModal(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) {
+        return FractionallySizedBox(
+          alignment: Alignment.bottomRight,
+          widthFactor: 0.4,
+          heightFactor: 0.3,
+          child: (Padding(
+            padding: const EdgeInsets.only(bottom: 48),
+            child: Card(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(0, 3, 0, 3),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    SizedBox(
+                      height: 30,
+                      child: TextButton(
+                        onPressed: () {},
+                        child: const SizedBox(
+                          width: 110,
+                          child: Text('Marcar todos'),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 30,
+                      child: TextButton(
+                        onPressed: () {},
+                        child: const SizedBox(
+                          width: 110,
+                          child: Text('Desmarcar todos'),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 30,
+                      child: TextButton(
+                        onPressed: () {},
+                        child: const SizedBox(
+                          width: 110,
+                          child: Text('Inverter seleção'),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 30,
+                      child: TextButton(
+                        onPressed: () {},
+                        child: const SizedBox(
+                          width: 110,
+                          child: Text('Excluir selecionados'),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          )),
         );
       },
     );
@@ -170,18 +239,21 @@ class _PessoaListState extends State<PessoaList> {
                 ),
                 onPressed: () {}),
             IconButton(
-                icon: const Icon(
-                  Icons.search,
-                  color: Colors.white,
-                ),
-                onPressed: () {}),
-            IconButton(
               icon: const Icon(
                 Icons.person_add_alt,
                 color: Colors.white,
               ),
               onPressed: () => _openPessoaFormModal(context),
             ),
+            IconButton(
+                icon: const Icon(
+                  Icons.arrow_drop_up,
+                  size: 30,
+                  color: Colors.white,
+                ),
+                onPressed: () {
+                  _openFuncoesBottonModal(context);
+                }),
             IconButton(
                 icon: const Icon(
                   Icons.filter_list_rounded,
