@@ -19,6 +19,8 @@ class _PessoaListState extends State<PessoaList> {
   bool selecionado = false;
   bool filterList = false;
   int qtdSelecionada = 0;
+  late String swipeDirection;
+  TextEditingController editingController = TextEditingController();
 
   static List<Pessoa> pessoas = [];
   addPessoa(String nome, double nivel) {
@@ -64,7 +66,6 @@ class _PessoaListState extends State<PessoaList> {
     );
   }
 
-  late String swipeDirection;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -76,33 +77,38 @@ class _PessoaListState extends State<PessoaList> {
           //
 
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               SizedBox(
                 child: Padding(
-                  padding: const EdgeInsets.only(left: 25.0),
+                  padding: const EdgeInsets.only(left: 20.0),
                   child: Text(
                     'Total: ${pessoas.length} ',
                   ),
                 ),
               ),
               const SizedBox(
-                width: 100,
-                height: 30,
-                child: Card(
-                  color: Color.fromARGB(255, 18, 1, 65),
-                  elevation: 5,
-                  child: Center(
-                    child: Text(
-                      'PLAYERS',
-                      style:
-                          TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
-                    ),
+                height: 20,
+              ),
+              Padding(
+                padding: const EdgeInsets.all(5.0),
+                child: SizedBox(
+                  height: 35,
+                  width: 200,
+                  child: TextField(
+                    controller: editingController,
+                    decoration: const InputDecoration(
+                        labelText: "Players",
+                        hintText: "Search",
+                        prefixIcon: Icon(Icons.search),
+                        border: OutlineInputBorder(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(25.0)))),
                   ),
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(right: 8.0),
+                padding: const EdgeInsets.only(right: 10.0),
                 child: Text(
                   'Selected: $qtdSelecionada',
                   textAlign: TextAlign.end,
