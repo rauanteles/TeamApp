@@ -22,7 +22,8 @@ class _PessoaListState extends State<PessoaList> {
   int qtdSelecionada = 0;
   late String swipeDirection;
   TextEditingController controller = TextEditingController();
-  List<Pessoa> pessoa = pessoas;
+
+  List<Pessoa> pessoaPesquisada = pessoas;
 
   static List<Pessoa> pessoas = [];
   addPessoa(String nome, double nivel) {
@@ -50,6 +51,9 @@ class _PessoaListState extends State<PessoaList> {
   _removePessoa(String id) {
     setState(() {
       pessoas.removeWhere(
+        (cd) => cd.id == id,
+      );
+      pessoaPesquisada.removeWhere(
         (cd) => cd.id == id,
       );
     });
@@ -89,7 +93,16 @@ class _PessoaListState extends State<PessoaList> {
                     SizedBox(
                       height: 30,
                       child: TextButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          for (Pessoa p in pessoas) {
+                            if (p.selecionado == false) {
+                              p.selecionado = true;
+                            }
+                            setState(() {
+                              qtdSelecionada = pessoas.length;
+                            });
+                          }
+                        },
                         child: const SizedBox(
                           width: 110,
                           child: Text('Marcar todos'),
@@ -99,7 +112,16 @@ class _PessoaListState extends State<PessoaList> {
                     SizedBox(
                       height: 30,
                       child: TextButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          for (Pessoa p in pessoas) {
+                            if (p.selecionado == true) {
+                              p.selecionado = false;
+                            }
+                            setState(() {
+                              qtdSelecionada = 0;
+                            });
+                          }
+                        },
                         child: const SizedBox(
                           width: 110,
                           child: Text('Desmarcar todos'),
@@ -109,7 +131,19 @@ class _PessoaListState extends State<PessoaList> {
                     SizedBox(
                       height: 30,
                       child: TextButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          for (Pessoa p in pessoas) {
+                            p.selecionado = !p.selecionado;
+
+                            setState(() {
+                              if (p.selecionado) {
+                                qtdSelecionada++;
+                              } else {
+                                qtdSelecionada--;
+                              }
+                            });
+                          }
+                        },
                         child: const SizedBox(
                           width: 110,
                           child: Text('Inverter seleção'),
@@ -119,7 +153,16 @@ class _PessoaListState extends State<PessoaList> {
                     SizedBox(
                       height: 30,
                       child: TextButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          for (Pessoa p in pessoas) {
+                            if (p.selecionado == true) {
+                              _removePessoa(p.id!);
+                              qtdSelecionada--;
+                            }
+
+                            setState(() {});
+                          }
+                        },
                         child: const SizedBox(
                           width: 110,
                           child: Text('Excluir selecionados'),
@@ -168,7 +211,6 @@ class _PessoaListState extends State<PessoaList> {
                   child: TextField(
                     controller: controller,
                     decoration: const InputDecoration(
-                        labelText: "Players",
                         hintText: "Search",
                         hintStyle: TextStyle(height: 3.2),
                         prefixIcon: Icon(Icons.search),
@@ -234,10 +276,14 @@ class _PessoaListState extends State<PessoaList> {
           children: <Widget>[
             IconButton(
                 icon: const Icon(
-                  Icons.search,
+                  Icons.import_export,
                   color: Colors.white,
                 ),
-                onPressed: () {}),
+                onPressed: () {
+                  for (Pessoa p in pessoas) {
+                    print(p.nome);
+                  }
+                }),
             IconButton(
               icon: const Icon(
                 Icons.person_add_alt,
@@ -383,7 +429,7 @@ class _PessoaListState extends State<PessoaList> {
   }
 
   void searchPessoa(String query) {
-    final suggestions = pessoa.where((pessoas) {
+    final suggestions = pessoaPesquisada.where((pessoas) {
       final pessoasNome = pessoas.nome!.toLowerCase();
       final input = query.toLowerCase();
       return pessoasNome.contains(input);

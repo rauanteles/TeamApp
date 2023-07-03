@@ -4,7 +4,7 @@
             "outputFile": "com.example.groupapp-mergeDebugResources-5:/values-si/values-si.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\rauan\\.gradle\\caches\\transforms-3\\4ca28c4a71705f8a687c69dda140a277\\transformed\\core-1.6.0\\res\\values-si\\values-si.xml",
+                    "source": "C:\\Users\\Lenovo\\.gradle\\caches\\transforms-3\\4ca28c4a71705f8a687c69dda140a277\\transformed\\core-1.6.0\\res\\values-si\\values-si.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",
