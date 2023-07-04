@@ -23,9 +23,9 @@ class _PessoaListState extends State<PessoaList> {
   late String swipeDirection;
   TextEditingController controller = TextEditingController();
 
-  List<Pessoa> pessoaPesquisada = pessoas;
-
   static List<Pessoa> pessoas = [];
+  static List<Pessoa> pessoasFiltrado = [];
+
   addPessoa(String nome, double nivel) {
     final newPessoa = Pessoa(
       id: Random().nextDouble().toString(),
@@ -37,6 +37,7 @@ class _PessoaListState extends State<PessoaList> {
 
     setState(() {
       pessoas.add(newPessoa);
+      pessoasFiltrado = pessoas;
     });
 
     int x = 0;
@@ -53,9 +54,7 @@ class _PessoaListState extends State<PessoaList> {
       pessoas.removeWhere(
         (cd) => cd.id == id,
       );
-      pessoaPesquisada.removeWhere(
-        (cd) => cd.id == id,
-      );
+      pessoasFiltrado = pessoas;
     });
   }
 
@@ -217,7 +216,9 @@ class _PessoaListState extends State<PessoaList> {
                         border: OutlineInputBorder(
                             borderRadius:
                                 BorderRadius.all(Radius.circular(25.0)))),
-                    onChanged: searchPessoa,
+                    onChanged: (value) {
+                      pesquisaPessoa(value);
+                    },
                   ),
                 ),
               ),
@@ -247,9 +248,11 @@ class _PessoaListState extends State<PessoaList> {
 
           Expanded(
             child: ListView.builder(
-              itemCount: (filterList ? listarOrdenado() : pessoas).length,
+              itemCount:
+                  (filterList ? listarOrdenado() : pessoasFiltrado).length,
               itemBuilder: (_, int index) {
-                Pessoa c = (filterList ? listarOrdenado() : pessoas)[index];
+                Pessoa c =
+                    (filterList ? listarOrdenado() : pessoasFiltrado)[index];
                 return cardModel(c);
               },
             ),
@@ -279,17 +282,16 @@ class _PessoaListState extends State<PessoaList> {
                   Icons.import_export,
                   color: Colors.white,
                 ),
-                onPressed: () {
-                  for (Pessoa p in pessoas) {
-                    print(p.nome);
-                  }
-                }),
+                onPressed: () {}),
             IconButton(
               icon: const Icon(
                 Icons.person_add_alt,
                 color: Colors.white,
               ),
-              onPressed: () => _openPessoaFormModal(context),
+              onPressed: () {
+                controller.text = '';
+                _openPessoaFormModal(context);
+              },
             ),
             IconButton(
                 icon: const Icon(
@@ -428,14 +430,13 @@ class _PessoaListState extends State<PessoaList> {
     return pessoas;
   }
 
-  void searchPessoa(String query) {
-    final suggestions = pessoaPesquisada.where((pessoas) {
-      final pessoasNome = pessoas.nome!.toLowerCase();
-      final input = query.toLowerCase();
-      return pessoasNome.contains(input);
+  pesquisaPessoa(String query) {
+    pessoasFiltrado = pessoas;
+
+    pessoasFiltrado = pessoasFiltrado.where((element) {
+      return element.nome!.contains(query.toLowerCase());
     }).toList();
-    setState(() {
-      pessoas = suggestions;
-    });
+
+    setState(() {});
   }
 }
