@@ -16,16 +16,280 @@ class PessoaList extends StatefulWidget {
 }
 
 class _PessoaListState extends State<PessoaList> {
+  //DECLARAÇÃO DE VARIAVEIS
+
   bool checkedJoker = false;
   bool selecionado = false;
   bool filterList = false;
+  bool colorFilter = false;
   int qtdSelecionada = 0;
   late String swipeDirection;
   TextEditingController controller = TextEditingController();
 
+  //LISTAS
+
   static List<Pessoa> pessoas = [];
   static List<Pessoa> pessoasFiltrado = [];
+  // ---------------------------------------------------------------------------
+  // --------------------------INICIO BUILDER-----------------------------------
+  // ---------------------------------------------------------------------------
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[
+          // -------------------------------------------------------------------
+          //-----------------------INFO DAS LISTAS------------------------------
+          // -------------------------------------------------------------------
 
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              SizedBox(
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 20.0),
+                  child: Text(
+                    'Total: ${pessoas.length} ',
+                  ),
+                ),
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              Padding(
+                padding: const EdgeInsets.all(5.0),
+                child: SizedBox(
+                  height: 35,
+                  width: 200,
+                  child: TextField(
+                    controller: controller,
+                    decoration: const InputDecoration(
+                        hintText: "Search",
+                        hintStyle: TextStyle(height: 3.2),
+                        prefixIcon: Icon(Icons.search),
+                        border: OutlineInputBorder(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(25.0)))),
+                    onChanged: (value) {
+                      pesquisaPessoa(value);
+                    },
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(right: 10.0),
+                child: Text(
+                  'Selected: $qtdSelecionada',
+                  textAlign: TextAlign.end,
+                ),
+              ),
+            ],
+          ),
+          const Padding(
+            padding: EdgeInsets.only(left: 8, right: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Text(
+                  'Double Click for captain',
+                  style: TextStyle(color: Colors.grey),
+                ),
+              ],
+            ),
+          ),
+          // -------------------------------------------------------------------
+          //------------------------VIEW DA LISTA-------------------------------
+          // -------------------------------------------------------------------
+          Expanded(
+            child: ListView.builder(
+              itemCount:
+                  (filterList ? listarOrdenado() : pessoasFiltrado).length,
+              itemBuilder: (_, int index) {
+                Pessoa c =
+                    (filterList ? listarOrdenado() : pessoasFiltrado)[index];
+                return cardModel(c);
+              },
+            ),
+          )
+        ],
+      ),
+      // ---------------------------------------------------------------------
+      // -------------------------NAV BAR-------------------------------------
+      // ---------------------------------------------------------------------
+      //BOTÃO RANDOM
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {},
+        backgroundColor: Colors.blue,
+        child: const Icon(Icons.shuffle),
+      ),
+      //BOTOES SECUNDARIOS
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      bottomNavigationBar: BottomAppBar(
+        color: Colors.purple,
+        shape: const CircularNotchedRectangle(),
+        notchMargin: 5,
+        child: Row(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            IconButton(
+                icon: const Icon(
+                  Icons.import_export,
+                  color: Colors.white,
+                ),
+                onPressed: () {}),
+            IconButton(
+              icon: const Icon(
+                Icons.person_add_alt,
+                color: Colors.white,
+              ),
+              onPressed: () {
+                controller.text = '';
+                _openPessoaFormModal(context);
+              },
+            ),
+            IconButton(
+                icon: const Icon(
+                  Icons.arrow_drop_up,
+                  size: 30,
+                  color: Colors.white,
+                ),
+                onPressed: () {
+                  _openFuncoesBottonModal(context);
+                }),
+            IconButton(
+                icon: Icon(
+                  colorFilter
+                      ? Icons.filter_list_rounded
+                      : Icons.filter_list_alt,
+                  color: Colors.white,
+                ),
+                onPressed: () {
+                  filterList = !filterList;
+                  colorFilter = !colorFilter;
+
+                  setState(() {});
+                }),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // ---------------------CARD DE PESSOAS---------------------------------------
+  // ---------------------------------------------------------------------------
+
+  cardModel(Pessoa cd) {
+    return InkWell(
+      onDoubleTap: () {
+        cd.coringa = !cd.coringa;
+        setState(() {});
+      },
+      // -----------------------------------------------------------------------
+      // ------------------------------SLIDE------------------------------------
+      // -----------------------------------------------------------------------
+      child: Slidable(
+        key: const ValueKey(0),
+        startActionPane: ActionPane(
+          motion: const ScrollMotion(),
+          children: [
+            SlidableAction(
+              onPressed: ((context) {
+                _removePessoa(cd.id!);
+                cd.selecionado ? qtdSelecionada-- : null;
+              }),
+              backgroundColor: const Color(0xFFFE4A49),
+              foregroundColor: Colors.white,
+              icon: Icons.delete,
+              label: 'Delete',
+            ),
+          ],
+        ),
+        child: Container(
+          color: cd.coringa
+              ? const Color.fromARGB(255, 255, 0, 179)
+              : Colors.white,
+          child: ListTile(
+            title: Row(
+              children: [
+                Expanded(
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: 120,
+                        height: 20,
+                        child: FittedBox(
+                          alignment: Alignment.bottomLeft,
+                          child: Text(
+                            cd.nome.toString(),
+                            style: TextStyle(
+                                color:
+                                    cd.coringa ? Colors.white : Colors.black),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        width: 10,
+                      ),
+                      // ------------------------------------------------------
+                      // -------------------RATING BAR-------------------------
+                      // ------------------------------------------------------
+                      RatingBar.builder(
+                        initialRating: cd.nivel!,
+                        minRating: 0.5,
+                        direction: Axis.horizontal,
+                        allowHalfRating: true,
+                        itemCount: 5,
+                        itemPadding: const EdgeInsets.symmetric(horizontal: 1),
+                        itemSize: 24.5,
+                        glowColor: Colors.amber,
+                        itemBuilder: (context, _) => const Icon(
+                          Icons.star,
+                          color: Colors.amber,
+                        ),
+                        onRatingUpdate: (rating) {
+                          cd.nivel = rating;
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            // -----------------------------------------------------------------
+            //--------------------VERIFICA SER SORTEADO-------------------------
+            // -----------------------------------------------------------------
+            trailing: InkWell(
+              onTap: () {
+                cd.selecionado = !cd.selecionado;
+                cd.selecionado ? qtdSelecionada++ : qtdSelecionada--;
+                setState(() {});
+              },
+              child: Builder(builder: (context) {
+                if (cd.selecionado) {
+                  return Icon(
+                    Icons.check_circle,
+                    color: cd.coringa ? Colors.white : Colors.black,
+                  );
+                } else {
+                  return Icon(
+                    Icons.check_circle_outlined,
+                    color: cd.coringa ? Colors.white : Colors.black,
+                  );
+                }
+              }),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  //----------------------------FUNÇÕES-----------------------------------------
+  //
+  //ADICIONAR PESSOA
   addPessoa(String nome, double nivel) {
     final newPessoa = Pessoa(
       id: Random().nextDouble().toString(),
@@ -49,6 +313,7 @@ class _PessoaListState extends State<PessoaList> {
     qtdSelecionada = x;
   }
 
+  //REMOVER PESSOA
   _removePessoa(String id) {
     setState(() {
       pessoas.removeWhere(
@@ -58,6 +323,7 @@ class _PessoaListState extends State<PessoaList> {
     });
   }
 
+  //ABRIR MODAL DE CADASTRO
   _openPessoaFormModal(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -71,6 +337,25 @@ class _PessoaListState extends State<PessoaList> {
     );
   }
 
+  //LISTAR ORDENADO QUEM TA MARCADO
+  List<Pessoa> listarOrdenado() {
+    pessoas
+        .sort((a, b) => a.selecionado ? 0 : 1.compareTo(b.selecionado ? 0 : 1));
+    return pessoas;
+  }
+
+  //FUNÇÃO PARA CRIAÇÃO DA SEGUNDA LISTA DE PESSOAS PESQUISADAS
+  pesquisaPessoa(String query) {
+    pessoasFiltrado = pessoas;
+
+    pessoasFiltrado = pessoasFiltrado.where((element) {
+      return element.nome!.contains(query.toLowerCase());
+    }).toList();
+
+    setState(() {});
+  }
+
+  // ABRIR MODAL PARA MEXER NA LISTA
   _openFuncoesBottonModal(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -176,267 +461,5 @@ class _PessoaListState extends State<PessoaList> {
         );
       },
     );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: <Widget>[
-          //
-          //INFO DAS LISTAS
-          //
-
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              SizedBox(
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 20.0),
-                  child: Text(
-                    'Total: ${pessoas.length} ',
-                  ),
-                ),
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              Padding(
-                padding: const EdgeInsets.all(5.0),
-                child: SizedBox(
-                  height: 35,
-                  width: 200,
-                  child: TextField(
-                    controller: controller,
-                    decoration: const InputDecoration(
-                        hintText: "Search",
-                        hintStyle: TextStyle(height: 3.2),
-                        prefixIcon: Icon(Icons.search),
-                        border: OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(25.0)))),
-                    onChanged: (value) {
-                      pesquisaPessoa(value);
-                    },
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(right: 10.0),
-                child: Text(
-                  'Selected: $qtdSelecionada',
-                  textAlign: TextAlign.end,
-                ),
-              ),
-            ],
-          ),
-          const Padding(
-            padding: EdgeInsets.only(left: 8, right: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Text(
-                  'Double Click for captain',
-                  style: TextStyle(color: Colors.grey),
-                ),
-              ],
-            ),
-          ),
-
-          //INICIO DA LISTA
-
-          Expanded(
-            child: ListView.builder(
-              itemCount:
-                  (filterList ? listarOrdenado() : pessoasFiltrado).length,
-              itemBuilder: (_, int index) {
-                Pessoa c =
-                    (filterList ? listarOrdenado() : pessoasFiltrado)[index];
-                return cardModel(c);
-              },
-            ),
-          )
-        ],
-      ),
-
-      // NAV BAR
-      //BOTÃO RANDOM
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        backgroundColor: Colors.blue,
-        child: const Icon(Icons.shuffle),
-      ),
-      //BOTOES SECUNDARIOS
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      bottomNavigationBar: BottomAppBar(
-        color: Colors.purple,
-        shape: const CircularNotchedRectangle(),
-        notchMargin: 5,
-        child: Row(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            IconButton(
-                icon: const Icon(
-                  Icons.import_export,
-                  color: Colors.white,
-                ),
-                onPressed: () {}),
-            IconButton(
-              icon: const Icon(
-                Icons.person_add_alt,
-                color: Colors.white,
-              ),
-              onPressed: () {
-                controller.text = '';
-                _openPessoaFormModal(context);
-              },
-            ),
-            IconButton(
-                icon: const Icon(
-                  Icons.arrow_drop_up,
-                  size: 30,
-                  color: Colors.white,
-                ),
-                onPressed: () {
-                  _openFuncoesBottonModal(context);
-                }),
-            IconButton(
-                icon: const Icon(
-                  Icons.filter_list_rounded,
-                  color: Colors.white,
-                ),
-                onPressed: () {
-                  filterList = !filterList;
-                  setState(() {});
-                }),
-          ],
-        ),
-      ),
-    );
-  }
-
-  cardModel(Pessoa cd) {
-    return InkWell(
-      onDoubleTap: () {
-        cd.coringa = !cd.coringa;
-        setState(() {});
-      },
-
-      // SLIDE
-
-      child: Slidable(
-        key: const ValueKey(0),
-        startActionPane: ActionPane(
-          motion: const ScrollMotion(),
-          children: [
-            SlidableAction(
-              onPressed: ((context) {
-                _removePessoa(cd.id!);
-                cd.selecionado ? qtdSelecionada-- : null;
-              }),
-              backgroundColor: const Color(0xFFFE4A49),
-              foregroundColor: Colors.white,
-              icon: Icons.delete,
-              label: 'Delete',
-            ),
-          ],
-        ),
-        child: Container(
-          color: cd.coringa
-              ? const Color.fromARGB(255, 255, 0, 179)
-              : Colors.white,
-          child: ListTile(
-            title: Row(
-              children: [
-                Expanded(
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: 120,
-                        height: 20,
-                        child: FittedBox(
-                          alignment: Alignment.bottomLeft,
-                          child: Text(
-                            cd.nome.toString(),
-                            style: TextStyle(
-                                color:
-                                    cd.coringa ? Colors.white : Colors.black),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(
-                        width: 10,
-                      ),
-
-                      // RATING BAR
-
-                      RatingBar.builder(
-                        initialRating: cd.nivel!,
-                        minRating: 0.5,
-                        direction: Axis.horizontal,
-                        allowHalfRating: true,
-                        itemCount: 5,
-                        itemPadding: const EdgeInsets.symmetric(horizontal: 1),
-                        itemSize: 24.5,
-                        glowColor: Colors.amber,
-                        itemBuilder: (context, _) => const Icon(
-                          Icons.star,
-                          color: Colors.amber,
-                        ),
-                        onRatingUpdate: (rating) {
-                          cd.nivel = rating;
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-
-            //VERIFICA SER SORTEADO
-
-            trailing: InkWell(
-              onTap: () {
-                cd.selecionado = !cd.selecionado;
-                cd.selecionado ? qtdSelecionada++ : qtdSelecionada--;
-                setState(() {});
-              },
-              child: Builder(builder: (context) {
-                if (cd.selecionado) {
-                  return Icon(
-                    Icons.check_circle,
-                    color: cd.coringa ? Colors.white : Colors.black,
-                  );
-                } else {
-                  return Icon(
-                    Icons.check_circle_outlined,
-                    color: cd.coringa ? Colors.white : Colors.black,
-                  );
-                }
-              }),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  //ORDENA QUEM TA MARCADO PARA CIMA
-  List<Pessoa> listarOrdenado() {
-    pessoas
-        .sort((a, b) => a.selecionado ? 0 : 1.compareTo(b.selecionado ? 0 : 1));
-    return pessoas;
-  }
-
-  pesquisaPessoa(String query) {
-    pessoasFiltrado = pessoas;
-
-    pessoasFiltrado = pessoasFiltrado.where((element) {
-      return element.nome!.contains(query.toLowerCase());
-    }).toList();
-
-    setState(() {});
   }
 }
