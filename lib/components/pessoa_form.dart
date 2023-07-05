@@ -17,7 +17,7 @@ class _PessoaFormState extends State<PessoaForm> {
   var nivelStar = 0.5;
 
   _submitForm() {
-    final nome = nomeController.text;
+    final nome = nomeController.text.toUpperCase();
     final nivel = nivelStar;
     if (nome.isEmpty || nivel <= 0) {
       return;

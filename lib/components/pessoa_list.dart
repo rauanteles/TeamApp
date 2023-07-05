@@ -1,11 +1,8 @@
 import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-
 import 'package:groupapp/components/pessoa_form.dart';
-
 import '../models/pessoa.dart';
 
 class PessoaList extends StatefulWidget {
@@ -25,6 +22,7 @@ class _PessoaListState extends State<PessoaList> {
   int qtdSelecionada = 0;
   late String swipeDirection;
   TextEditingController controller = TextEditingController();
+  TextEditingController controllerEditName = TextEditingController();
 
   //LISTAS
 
@@ -146,7 +144,7 @@ class _PessoaListState extends State<PessoaList> {
               ),
               onPressed: () {
                 controller.text = '';
-                _openPessoaFormModal(context);
+                openPessoaFormModal(context);
               },
             ),
             IconButton(
@@ -183,6 +181,9 @@ class _PessoaListState extends State<PessoaList> {
 
   cardModel(Pessoa cd) {
     return InkWell(
+      onTap: () {
+        _openPessoaEditModal(context, cd);
+      },
       onDoubleTap: () {
         cd.coringa = !cd.coringa;
         setState(() {});
@@ -197,7 +198,7 @@ class _PessoaListState extends State<PessoaList> {
           children: [
             SlidableAction(
               onPressed: ((context) {
-                _removePessoa(cd.id!);
+                removePessoa(cd.id!);
                 cd.selecionado ? qtdSelecionada-- : null;
               }),
               backgroundColor: const Color(0xFFFE4A49),
@@ -287,8 +288,9 @@ class _PessoaListState extends State<PessoaList> {
     );
   }
 
+  //----------------------------------------------------------------------------
   //----------------------------FUNÇÕES-----------------------------------------
-  //
+  //----------------------------------------------------------------------------
   //ADICIONAR PESSOA
   addPessoa(String nome, double nivel) {
     final newPessoa = Pessoa(
@@ -314,7 +316,7 @@ class _PessoaListState extends State<PessoaList> {
   }
 
   //REMOVER PESSOA
-  _removePessoa(String id) {
+  removePessoa(String id) {
     setState(() {
       pessoas.removeWhere(
         (cd) => cd.id == id,
@@ -324,7 +326,7 @@ class _PessoaListState extends State<PessoaList> {
   }
 
   //ABRIR MODAL DE CADASTRO
-  _openPessoaFormModal(BuildContext context) {
+  openPessoaFormModal(BuildContext context) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -349,7 +351,7 @@ class _PessoaListState extends State<PessoaList> {
     pessoasFiltrado = pessoas;
 
     pessoasFiltrado = pessoasFiltrado.where((element) {
-      return element.nome!.contains(query.toLowerCase());
+      return element.nome!.contains(query.toUpperCase());
     }).toList();
 
     setState(() {});
@@ -440,8 +442,9 @@ class _PessoaListState extends State<PessoaList> {
                         onPressed: () {
                           for (Pessoa p in pessoas) {
                             if (p.selecionado == true) {
-                              _removePessoa(p.id!);
-                              qtdSelecionada--;
+                              pessoas.removeWhere(
+                                  (item) => item.selecionado == true);
+                              qtdSelecionada = 0;
                             }
 
                             setState(() {});
@@ -461,5 +464,58 @@ class _PessoaListState extends State<PessoaList> {
         );
       },
     );
+  }
+
+  _openPessoaEditModal(
+    BuildContext context,
+    cd,
+  ) {
+    controllerEditName.text = cd.nome!;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) {
+        return FractionallySizedBox(
+          alignment: Alignment.center,
+          widthFactor: 0.75,
+          heightFactor: 0.6,
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 300.0),
+            child: Card(
+              child: SizedBox(
+                child: Column(
+                  children: [
+                    TextField(
+                      autofocus: true,
+                      controller: controllerEditName,
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        cd.nome = controllerEditName.text;
+                        if (controllerEditName.text != '') {
+                          atualizarLista(cd);
+                        }
+                      },
+                      child: const Text("atualizar"),
+                    )
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  atualizarLista(Pessoa pessoa) {
+    for (Pessoa p in pessoas) {
+      if (p.id == pessoa.id) {
+        p.nome = pessoa.nome!.toUpperCase();
+      }
+      setState(() {});
+    }
   }
 }
