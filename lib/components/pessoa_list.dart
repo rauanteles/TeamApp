@@ -1,10 +1,10 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:groupapp/components/pessoa_form.dart';
 import '../models/pessoa.dart';
-import 'function_import.dart';
 
 class PessoaList extends StatefulWidget {
   const PessoaList({super.key});
@@ -470,10 +470,7 @@ class _PessoaListState extends State<PessoaList> {
   }
 
   // ABRIR MODAL PARA EDITAR PESSOA
-  _openPessoaEditModal(
-    BuildContext context,
-    cd,
-  ) {
+  _openPessoaEditModal(BuildContext context, cd) {
     controllerEditName.text = cd.nome!;
 
     showModalBottomSheet(
@@ -551,7 +548,7 @@ class _PessoaListState extends State<PessoaList> {
                         },
                         child: const Text(
                           "Ok",
-                          style: TextStyle(color: Colors.purple, fontSize: 25),
+                          style: TextStyle(color: Colors.blue, fontSize: 25),
                         ),
                       )
                     ],
@@ -573,5 +570,108 @@ class _PessoaListState extends State<PessoaList> {
       }
       setState(() {});
     }
+  }
+
+  //importar lista
+  openImportModal(context) {
+    TextEditingController controller = TextEditingController();
+    showModalBottomSheet(
+      backgroundColor: Colors.transparent,
+      context: context,
+      builder: (_) {
+        return Card(
+          child: Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.copy),
+                      onPressed: () {
+                        Clipboard.getData(Clipboard.kTextPlain).then((value) {
+                          controller.text = controller.text + value!.text!;
+                        });
+                      },
+                    ),
+                    const Text(
+                      "Import Players List",
+                      style: TextStyle(color: Colors.blue, fontSize: 20),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline_rounded),
+                      onPressed: () {
+                        controller.text = '';
+                      },
+                    ),
+                  ],
+                ),
+                Card(
+                  elevation: 5,
+                  child: TextField(
+                    maxLines: 10,
+                    enabled: false,
+                    controller: controller,
+                  ),
+                ),
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.import_export),
+                  label: const Text("Import"),
+                  onPressed: () {
+                    showDialog<String>(
+                      context: context,
+                      builder: (BuildContext context) => Dialog(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              const Text(
+                                'Confirma apagar os jogadores da lista atual?',
+                                style: TextStyle(fontSize: 20),
+                              ),
+                              const SizedBox(height: 15),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  TextButton(
+                                    onPressed: () {
+                                      String texto = controller.text;
+                                      pessoas.clear();
+                                      pessoasFiltrado = pessoas;
+                                      final splitLine = texto.split('\n');
+                                      for (int i = 0;
+                                          i < splitLine.length;
+                                          i++) {
+                                        addPessoa(splitLine[i], 0.5);
+                                      }
+                                      Navigator.pop(context);
+                                    },
+                                    child: const Text("Confirm"),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                    },
+                                    child: const Text('Cancel'),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                )
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 }
