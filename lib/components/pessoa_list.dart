@@ -4,6 +4,7 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:groupapp/components/pessoa_form.dart';
 import '../models/pessoa.dart';
+import 'function_import.dart';
 
 class PessoaList extends StatefulWidget {
   const PessoaList({super.key});
@@ -136,7 +137,9 @@ class _PessoaListState extends State<PessoaList> {
                   Icons.import_export,
                   color: Colors.white,
                 ),
-                onPressed: () {}),
+                onPressed: () {
+                  openImportModal(context);
+                }),
             IconButton(
               icon: const Icon(
                 Icons.person_add_alt,
@@ -291,7 +294,7 @@ class _PessoaListState extends State<PessoaList> {
   //----------------------------------------------------------------------------
   //----------------------------FUNÇÕES-----------------------------------------
   //----------------------------------------------------------------------------
-  //ADICIONAR PESSOA
+  // ADICIONAR PESSOA
   addPessoa(String nome, double nivel) {
     final newPessoa = Pessoa(
       id: Random().nextDouble().toString(),
@@ -315,7 +318,7 @@ class _PessoaListState extends State<PessoaList> {
     qtdSelecionada = x;
   }
 
-  //REMOVER PESSOA
+  // REMOVER PESSOA
   removePessoa(String id) {
     setState(() {
       pessoas.removeWhere(
@@ -325,7 +328,7 @@ class _PessoaListState extends State<PessoaList> {
     });
   }
 
-  //ABRIR MODAL DE CADASTRO
+  // ABRIR MODAL DE CADASTRO
   openPessoaFormModal(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -339,14 +342,14 @@ class _PessoaListState extends State<PessoaList> {
     );
   }
 
-  //LISTAR ORDENADO QUEM TA MARCADO
+  // LISTAR ORDENADO QUEM TA MARCADO
   List<Pessoa> listarOrdenado() {
     pessoas
         .sort((a, b) => a.selecionado ? 0 : 1.compareTo(b.selecionado ? 0 : 1));
     return pessoas;
   }
 
-  //FUNÇÃO PARA CRIAÇÃO DA SEGUNDA LISTA DE PESSOAS PESQUISADAS
+  // FUNÇÃO PARA CRIAÇÃO DA SEGUNDA LISTA DE PESSOAS PESQUISADAS
   pesquisaPessoa(String query) {
     pessoasFiltrado = pessoas;
 
@@ -466,6 +469,7 @@ class _PessoaListState extends State<PessoaList> {
     );
   }
 
+  // ABRIR MODAL PARA EDITAR PESSOA
   _openPessoaEditModal(
     BuildContext context,
     cd,
@@ -477,32 +481,83 @@ class _PessoaListState extends State<PessoaList> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) {
+        submit() {
+          cd.nome = controllerEditName.text;
+          if (controllerEditName.text != '') {
+            atualizarLista(cd);
+            Navigator.pop(context);
+          }
+        }
+
         return FractionallySizedBox(
           alignment: Alignment.center,
           widthFactor: 0.75,
-          heightFactor: 0.6,
+          heightFactor: 0.75,
           child: Padding(
             padding: const EdgeInsets.only(bottom: 300.0),
-            child: Card(
-              child: SizedBox(
-                child: Column(
-                  children: [
-                    TextField(
-                      autofocus: true,
-                      controller: controllerEditName,
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        cd.nome = controllerEditName.text;
-                        if (controllerEditName.text != '') {
-                          atualizarLista(cd);
-                        }
-                      },
-                      child: const Text("atualizar"),
-                    )
-                  ],
+            child: Column(
+              children: [
+                SizedBox(
+                  width: 200,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 5.0),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(width: 3, color: Colors.white),
+                              color: Colors.purple,
+                              borderRadius:
+                                  const BorderRadius.all(Radius.circular(20)),
+                            ),
+                            child: const Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Center(
+                                child: Text(
+                                  "Edit Name",
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 25),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
+                Card(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      SizedBox(
+                        width: 200,
+                        height: 50,
+                        child: Card(
+                          elevation: 5,
+                          child: TextField(
+                            textAlign: TextAlign.center,
+                            textInputAction: TextInputAction.done,
+                            autofocus: true,
+                            controller: controllerEditName,
+                            onSubmitted: (value) => submit(),
+                          ),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          submit();
+                        },
+                        child: const Text(
+                          "Ok",
+                          style: TextStyle(color: Colors.purple, fontSize: 25),
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
         );
@@ -510,6 +565,7 @@ class _PessoaListState extends State<PessoaList> {
     );
   }
 
+  // ATUALIZAR A LISTA
   atualizarLista(Pessoa pessoa) {
     for (Pessoa p in pessoas) {
       if (p.id == pessoa.id) {
