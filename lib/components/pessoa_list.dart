@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:groupapp/components/funcao_buttom_list.dart';
 import 'package:groupapp/components/pessoa_form.dart';
 import '../models/pessoa.dart';
 
@@ -295,9 +296,10 @@ class _PessoaListState extends State<PessoaList> {
   //----------------------------FUNÇÕES-----------------------------------------
   //----------------------------------------------------------------------------
   // ADICIONAR PESSOA
+
   addPessoa(String nome, double nivel) {
     final newPessoa = Pessoa(
-      id: Random().nextDouble().toString(),
+      id: Random().nextInt(100).toString(),
       nome: nome,
       nivel: nivel,
       coringa: false,
@@ -362,109 +364,119 @@ class _PessoaListState extends State<PessoaList> {
 
   // ABRIR MODAL PARA MEXER NA LISTA
   _openFuncoesBottonModal(BuildContext context) {
+    editList(bool selecionado, int contador) {
+      for (Pessoa e in pessoas) {
+        e.selecionado = selecionado;
+        qtdSelecionada = contador;
+        setState(() {});
+      }
+    }
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) {
         return FractionallySizedBox(
-          alignment: Alignment.bottomRight,
-          widthFactor: 0.4,
-          heightFactor: 0.3,
-          child: (Padding(
-            padding: const EdgeInsets.only(bottom: 48),
-            child: Card(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(0, 3, 0, 3),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    SizedBox(
-                      height: 30,
-                      child: TextButton(
-                        onPressed: () {
-                          for (Pessoa p in pessoas) {
-                            if (p.selecionado == false) {
-                              p.selecionado = true;
-                            }
-                            setState(() {
-                              qtdSelecionada = pessoas.length;
-                            });
-                          }
-                        },
-                        child: const SizedBox(
-                          width: 110,
-                          child: Text('Marcar todos'),
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      height: 30,
-                      child: TextButton(
-                        onPressed: () {
-                          for (Pessoa p in pessoas) {
-                            if (p.selecionado == true) {
-                              p.selecionado = false;
-                            }
-                            setState(() {
-                              qtdSelecionada = 0;
-                            });
-                          }
-                        },
-                        child: const SizedBox(
-                          width: 110,
-                          child: Text('Desmarcar todos'),
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      height: 30,
-                      child: TextButton(
-                        onPressed: () {
-                          for (Pessoa p in pessoas) {
-                            p.selecionado = !p.selecionado;
+            alignment: Alignment.bottomRight,
+            widthFactor: 0.4,
+            heightFactor: 0.3,
+            child: (FuncaoButtomList(editList, pessoas))
 
-                            setState(() {
-                              if (p.selecionado) {
-                                qtdSelecionada++;
-                              } else {
-                                qtdSelecionada--;
-                              }
-                            });
-                          }
-                        },
-                        child: const SizedBox(
-                          width: 110,
-                          child: Text('Inverter seleção'),
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      height: 30,
-                      child: TextButton(
-                        onPressed: () {
-                          for (Pessoa p in pessoas) {
-                            if (p.selecionado == true) {
-                              pessoas.removeWhere(
-                                  (item) => item.selecionado == true);
-                              qtdSelecionada = 0;
-                            }
+            //     (Padding(
+            //   padding: const EdgeInsets.only(bottom: 48),
+            //   child: Card(
+            //     child: Padding(
+            //       padding: const EdgeInsets.fromLTRB(0, 3, 0, 3),
+            //       child: Column(
+            //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            //         children: [
+            //           SizedBox(
+            //             height: 30,
+            //             child: TextButton(
+            //               onPressed: () {
+            //                 for (Pessoa p in pessoas) {
+            //                   if (p.selecionado == false) {
+            //                     p.selecionado = true;
+            //                   }
+            //                   setState(() {
+            //                     qtdSelecionada = pessoas.length;
+            //                   });
+            //                 }
+            //               },
+            //               child: const SizedBox(
+            //                 width: 110,
+            //                 child: Text('Marcar todos'),
+            //               ),
+            //             ),
+            //           ),
+            //           SizedBox(
+            //             height: 30,
+            //             child: TextButton(
+            //               onPressed: () {
+            //                 for (Pessoa p in pessoas) {
+            //                   if (p.selecionado == true) {
+            //                     p.selecionado = false;
+            //                   }
+            //                   setState(() {
+            //                     qtdSelecionada = 0;
+            //                   });
+            //                 }
+            //               },
+            //               child: const SizedBox(
+            //                 width: 110,
+            //                 child: Text('Desmarcar todos'),
+            //               ),
+            //             ),
+            //           ),
+            //           SizedBox(
+            //             height: 30,
+            //             child: TextButton(
+            //               onPressed: () {
+            //                 for (Pessoa p in pessoas) {
+            //                   p.selecionado = !p.selecionado;
 
-                            setState(() {});
-                          }
-                        },
-                        child: const SizedBox(
-                          width: 110,
-                          child: Text('Excluir selecionados'),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          )),
-        );
+            //                   setState(() {
+            //                     if (p.selecionado) {
+            //                       qtdSelecionada++;
+            //                     } else {
+            //                       qtdSelecionada--;
+            //                     }
+            //                   });
+            //                 }
+            //               },
+            //               child: const SizedBox(
+            //                 width: 110,
+            //                 child: Text('Inverter seleção'),
+            //               ),
+            //             ),
+            //           ),
+            //           SizedBox(
+            //             height: 30,
+            //             child: TextButton(
+            //               onPressed: () {
+            //                 for (Pessoa p in pessoas) {
+            //                   if (p.selecionado == true) {
+            //                     pessoas.removeWhere(
+            //                         (item) => item.selecionado == true);
+            //                     qtdSelecionada = 0;
+            //                   }
+
+            //                   setState(() {});
+            //                 }
+            //               },
+            //               child: const SizedBox(
+            //                 width: 110,
+            //                 child: Text('Excluir selecionados'),
+            //               ),
+            //             ),
+            //           ),
+            //         ],
+            //       ),
+            //     ),
+            //   ),
+            // )),
+            );
       },
     );
   }

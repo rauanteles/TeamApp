@@ -4,9 +4,9 @@ import 'package:groupapp/models/pessoa.dart';
 
 class PessoaForm extends StatefulWidget {
   final void Function(String, double) onSubmit;
-  final List<Pessoa> pessoas;
+  final List<Pessoa> lista;
 
-  const PessoaForm(this.onSubmit, this.pessoas, {super.key});
+  const PessoaForm(this.onSubmit, this.lista, {super.key});
 
   @override
   State<PessoaForm> createState() => _PessoaFormState();
@@ -23,7 +23,7 @@ class _PessoaFormState extends State<PessoaForm> {
       return;
     }
 
-    for (Pessoa element in widget.pessoas) {
+    for (Pessoa element in widget.lista) {
       if (element.nome == nome) {
         return;
       }
