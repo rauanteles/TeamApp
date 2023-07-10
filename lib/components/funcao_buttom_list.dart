@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/pessoa.dart';
 
 class FuncaoButtomList extends StatefulWidget {
-  final void Function(bool, int) onSubmit;
+  final void Function(bool, int, int) onSubmit;
   final List<Pessoa> list;
 
   const FuncaoButtomList(this.onSubmit, this.list, {super.key});
@@ -14,7 +14,8 @@ class FuncaoButtomList extends StatefulWidget {
 
 class _FuncaoButtomListState extends State<FuncaoButtomList> {
   int contador = 0;
-  bool selecionado = true;
+  late bool selecionado;
+  int caso = 0;
 
   submitSelect(int opcao) {
     switch (opcao) {
@@ -29,20 +30,16 @@ class _FuncaoButtomListState extends State<FuncaoButtomList> {
 
         break;
       case 3:
-        for (Pessoa element in widget.list) {
-          element.selecionado = !element.selecionado;
-          selecionado = element.selecionado;
-        }
+        caso = 3;
+        selecionado = false;
         break;
       case 4:
-        // for (Pessoa element in widget.list) {
-        //   setState(() {});
-        // }
-
+        caso = 4;
+        selecionado = false;
         break;
       default:
     }
-    widget.onSubmit(selecionado, contador);
+    widget.onSubmit(selecionado, contador, caso);
   }
 
   @override

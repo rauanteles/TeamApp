@@ -5,6 +5,7 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:groupapp/components/funcao_buttom_list.dart';
 import 'package:groupapp/components/pessoa_form.dart';
+import 'package:groupapp/sorteio/sorteio_tela.dart';
 import '../models/pessoa.dart';
 
 class PessoaList extends StatefulWidget {
@@ -65,7 +66,7 @@ class _PessoaListState extends State<PessoaList> {
                   child: TextField(
                     controller: controller,
                     decoration: const InputDecoration(
-                        hintText: "Search",
+                        hintText: "Pesquisar",
                         hintStyle: TextStyle(height: 3.2),
                         prefixIcon: Icon(Icons.search),
                         border: OutlineInputBorder(
@@ -80,7 +81,7 @@ class _PessoaListState extends State<PessoaList> {
               Padding(
                 padding: const EdgeInsets.only(right: 10.0),
                 child: Text(
-                  'Selected: $qtdSelecionada',
+                  'Selecionados: $qtdSelecionada',
                   textAlign: TextAlign.end,
                 ),
               ),
@@ -92,7 +93,7 @@ class _PessoaListState extends State<PessoaList> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 Text(
-                  'Double Click for captain',
+                  'Duplo click para selecionar o capitão',
                   style: TextStyle(color: Colors.grey),
                 ),
               ],
@@ -119,7 +120,9 @@ class _PessoaListState extends State<PessoaList> {
       // ---------------------------------------------------------------------
       //BOTÃO RANDOM
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          const SorteioTela();
+        },
         backgroundColor: Colors.blue,
         child: const Icon(Icons.shuffle),
       ),
@@ -364,12 +367,34 @@ class _PessoaListState extends State<PessoaList> {
 
   // ABRIR MODAL PARA MEXER NA LISTA
   _openFuncoesBottonModal(BuildContext context) {
-    editList(bool selecionado, int contador) {
-      for (Pessoa e in pessoas) {
-        e.selecionado = selecionado;
-        qtdSelecionada = contador;
-        setState(() {});
+    editList(bool selecionado, int contador, caso) {
+      switch (caso) {
+        case 3:
+          for (Pessoa e in pessoas) {
+            e.selecionado = !e.selecionado;
+            if (e.selecionado) {
+              qtdSelecionada++;
+            } else {
+              qtdSelecionada--;
+            }
+          }
+          break;
+        case 4:
+          for (Pessoa p in pessoas) {
+            if (p.selecionado == true) {
+              pessoas.removeWhere((item) => item.selecionado == true);
+              qtdSelecionada = 0;
+            }
+            setState(() {});
+          }
+          break;
+        default:
+          for (Pessoa e in pessoas) {
+            e.selecionado = selecionado;
+            qtdSelecionada = contador;
+          }
       }
+      setState(() {});
     }
 
     showModalBottomSheet(
@@ -381,102 +406,7 @@ class _PessoaListState extends State<PessoaList> {
             alignment: Alignment.bottomRight,
             widthFactor: 0.4,
             heightFactor: 0.3,
-            child: (FuncaoButtomList(editList, pessoas))
-
-            //     (Padding(
-            //   padding: const EdgeInsets.only(bottom: 48),
-            //   child: Card(
-            //     child: Padding(
-            //       padding: const EdgeInsets.fromLTRB(0, 3, 0, 3),
-            //       child: Column(
-            //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            //         children: [
-            //           SizedBox(
-            //             height: 30,
-            //             child: TextButton(
-            //               onPressed: () {
-            //                 for (Pessoa p in pessoas) {
-            //                   if (p.selecionado == false) {
-            //                     p.selecionado = true;
-            //                   }
-            //                   setState(() {
-            //                     qtdSelecionada = pessoas.length;
-            //                   });
-            //                 }
-            //               },
-            //               child: const SizedBox(
-            //                 width: 110,
-            //                 child: Text('Marcar todos'),
-            //               ),
-            //             ),
-            //           ),
-            //           SizedBox(
-            //             height: 30,
-            //             child: TextButton(
-            //               onPressed: () {
-            //                 for (Pessoa p in pessoas) {
-            //                   if (p.selecionado == true) {
-            //                     p.selecionado = false;
-            //                   }
-            //                   setState(() {
-            //                     qtdSelecionada = 0;
-            //                   });
-            //                 }
-            //               },
-            //               child: const SizedBox(
-            //                 width: 110,
-            //                 child: Text('Desmarcar todos'),
-            //               ),
-            //             ),
-            //           ),
-            //           SizedBox(
-            //             height: 30,
-            //             child: TextButton(
-            //               onPressed: () {
-            //                 for (Pessoa p in pessoas) {
-            //                   p.selecionado = !p.selecionado;
-
-            //                   setState(() {
-            //                     if (p.selecionado) {
-            //                       qtdSelecionada++;
-            //                     } else {
-            //                       qtdSelecionada--;
-            //                     }
-            //                   });
-            //                 }
-            //               },
-            //               child: const SizedBox(
-            //                 width: 110,
-            //                 child: Text('Inverter seleção'),
-            //               ),
-            //             ),
-            //           ),
-            //           SizedBox(
-            //             height: 30,
-            //             child: TextButton(
-            //               onPressed: () {
-            //                 for (Pessoa p in pessoas) {
-            //                   if (p.selecionado == true) {
-            //                     pessoas.removeWhere(
-            //                         (item) => item.selecionado == true);
-            //                     qtdSelecionada = 0;
-            //                   }
-
-            //                   setState(() {});
-            //                 }
-            //               },
-            //               child: const SizedBox(
-            //                 width: 110,
-            //                 child: Text('Excluir selecionados'),
-            //               ),
-            //             ),
-            //           ),
-            //         ],
-            //       ),
-            //     ),
-            //   ),
-            // )),
-            );
+            child: (FuncaoButtomList(editList, pessoas)));
       },
     );
   }
@@ -608,7 +538,7 @@ class _PessoaListState extends State<PessoaList> {
                       },
                     ),
                     const Text(
-                      "Import Players List",
+                      "Importar Lista de Jogadores",
                       style: TextStyle(color: Colors.blue, fontSize: 20),
                     ),
                     IconButton(
@@ -623,13 +553,14 @@ class _PessoaListState extends State<PessoaList> {
                   elevation: 5,
                   child: TextField(
                     maxLines: 10,
-                    enabled: false,
+                    enabled: true,
+                    autofocus: false,
                     controller: controller,
                   ),
                 ),
                 ElevatedButton.icon(
                   icon: const Icon(Icons.import_export),
-                  label: const Text("Import"),
+                  label: const Text("Importar"),
                   onPressed: () {
                     showDialog<String>(
                       context: context,
@@ -658,17 +589,18 @@ class _PessoaListState extends State<PessoaList> {
                                       for (int i = 0;
                                           i < splitLine.length;
                                           i++) {
-                                        addPessoa(splitLine[i], 0.5);
+                                        addPessoa(
+                                            splitLine[i].toUpperCase(), 0.5);
                                       }
                                       Navigator.pop(context);
                                     },
-                                    child: const Text("Confirm"),
+                                    child: const Text("Confirmar"),
                                   ),
                                   TextButton(
                                     onPressed: () {
                                       Navigator.pop(context);
                                     },
-                                    child: const Text('Cancel'),
+                                    child: const Text('Cancelar'),
                                   ),
                                 ],
                               ),
