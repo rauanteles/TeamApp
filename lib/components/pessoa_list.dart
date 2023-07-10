@@ -121,7 +121,7 @@ class _PessoaListState extends State<PessoaList> {
       //BOTÃO RANDOM
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          const SorteioTela();
+          pageSorteio(pessoas);
         },
         backgroundColor: Colors.blue,
         child: const Icon(Icons.shuffle),
@@ -298,8 +298,16 @@ class _PessoaListState extends State<PessoaList> {
   //----------------------------------------------------------------------------
   //----------------------------FUNÇÕES-----------------------------------------
   //----------------------------------------------------------------------------
-  // ADICIONAR PESSOA
+  //ABRIR PAGINA DE SORTEIO
+  pageSorteio(pessoas) {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => SorteioPage(pessoas),
+        ));
+  }
 
+  // ADICIONAR PESSOA
   addPessoa(String nome, double nivel) {
     final newPessoa = Pessoa(
       id: Random().nextInt(100).toString(),
