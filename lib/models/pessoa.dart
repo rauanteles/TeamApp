@@ -12,4 +12,9 @@ class Pessoa {
     required this.coringa,
     required this.selecionado,
   });
+
+  @override
+  String toString() {
+    return '$nome';
+  }
 }
