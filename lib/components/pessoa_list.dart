@@ -62,7 +62,7 @@ class _PessoaListState extends State<PessoaList> {
                 padding: const EdgeInsets.all(5.0),
                 child: SizedBox(
                   height: 35,
-                  width: 200,
+                  width: 170,
                   child: TextField(
                     controller: controller,
                     decoration: const InputDecoration(
@@ -303,7 +303,7 @@ class _PessoaListState extends State<PessoaList> {
     Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => SorteioPage(pessoas),
+          builder: (_) => SorteioPage(qtdSelecionada, pessoas),
         ));
   }
 
