@@ -5,8 +5,9 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:groupapp/components/funcao_buttom_list.dart';
 import 'package:groupapp/components/pessoa_form.dart';
-import 'package:groupapp/sorteio/sorteio_tela.dart';
+
 import '../models/pessoa.dart';
+import '../sorteio/sorteio_page.dart';
 
 class PessoaList extends StatefulWidget {
   const PessoaList({super.key});
@@ -600,6 +601,7 @@ class _PessoaListState extends State<PessoaList> {
                                         addPessoa(
                                             splitLine[i].toUpperCase(), 0.5);
                                       }
+                                      Navigator.pop(context);
                                       Navigator.pop(context);
                                     },
                                     child: const Text("Confirmar"),
