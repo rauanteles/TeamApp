@@ -40,6 +40,7 @@ class _FuncaoButtomListState extends State<FuncaoButtomList> {
       default:
     }
     widget.onSubmit(selecionado, contador, caso);
+    Navigator.pop(context);
   }
 
   @override

@@ -24,6 +24,7 @@ class _PessoaListState extends State<PessoaList> {
   bool filterList = false;
   bool colorFilter = false;
   int qtdSelecionada = 0;
+  int qtdCoringas = 0;
   late String swipeDirection;
   TextEditingController controller = TextEditingController();
   TextEditingController controllerEditName = TextEditingController();
@@ -194,6 +195,7 @@ class _PessoaListState extends State<PessoaList> {
       },
       onDoubleTap: () {
         cd.coringa = !cd.coringa;
+        qtdCoringas++;
         setState(() {});
       },
       // -----------------------------------------------------------------------
@@ -208,6 +210,7 @@ class _PessoaListState extends State<PessoaList> {
               onPressed: ((context) {
                 removePessoa(cd.id!);
                 cd.selecionado ? qtdSelecionada-- : null;
+                cd.coringa ? qtdCoringas++ : null;
               }),
               backgroundColor: const Color(0xFFFE4A49),
               foregroundColor: Colors.white,
@@ -304,7 +307,7 @@ class _PessoaListState extends State<PessoaList> {
     Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => SorteioPage(qtdSelecionada, pessoas),
+          builder: (_) => SorteioPage(pessoas, qtdSelecionada, qtdCoringas),
         ));
   }
 
@@ -393,6 +396,7 @@ class _PessoaListState extends State<PessoaList> {
             if (p.selecionado == true) {
               pessoas.removeWhere((item) => item.selecionado == true);
               qtdSelecionada = 0;
+              qtdCoringas = 0;
             }
             setState(() {});
           }

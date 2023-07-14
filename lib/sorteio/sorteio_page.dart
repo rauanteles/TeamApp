@@ -5,20 +5,28 @@ import 'package:flutter/material.dart';
 import '../models/pessoa.dart';
 
 class SorteioPage extends StatefulWidget {
-  final int selecionados;
   final List<Pessoa> list;
-  const SorteioPage(this.selecionados, this.list, {super.key});
+  final int qtdSelecionada;
+  final int qtdCoringas;
+  const SorteioPage(this.list, this.qtdSelecionada, this.qtdCoringas,
+      {super.key});
 
   @override
   State<SorteioPage> createState() => _SorteioPageState();
 }
 
 class _SorteioPageState extends State<SorteioPage> {
+  var times = [];
   int pessoasPorTime = 2;
+
+  bool verificaCoringa(List<Pessoa> time, List<Pessoa> coringas) {
+    return time.any((pessoa) => coringas.contains(pessoa));
+  }
 
   List<List<Pessoa>> gerarTimes(List<Pessoa> pessoas, int tamanhoTime) {
     final pessoasSelecionadas =
         List<Pessoa>.from(pessoas.where((pessoa) => pessoa.selecionado));
+
     final random = Random();
     final times = <List<Pessoa>>[];
     final numTimes = (pessoasSelecionadas.length / tamanhoTime).ceil();
@@ -30,17 +38,23 @@ class _SorteioPageState extends State<SorteioPage> {
     List<List<Pessoa>> sorteados = [];
 
     while (!deuCerto) {
+      final coringas =
+          pessoasSelecionadas.where((pessoa) => pessoa.coringa).toList();
       pessoasSelecionadas.shuffle(random);
+      pessoasSelecionadas.removeWhere(
+          (pessoasSelecionadas) => coringas.contains(pessoasSelecionadas));
+      for (int i = 0; i < coringas.length; i++) {
+        pessoasSelecionadas.insert(i * tamanhoTime, coringas[i]);
+      }
+      print(pessoasSelecionadas);
+
       for (var i = 0; i < numTimes; i++) {
         final time = pessoasSelecionadas.sublist(0, tamanhoTime);
+
         times.add(time);
 
         somaNiveisTime = time.fold(0.0, (soma, pessoa) => soma + pessoa.nivel!);
-        // print("radom: $pessoasSelecionadas");
-        // print('soma times: $somaNiveisTime');
-        // print('diferença: ${somaNiveisTime - somaNiveisDesejada}');
-        // print('deu certo: $deuCerto');
-        // print('lista sorteados = $sorteados');
+
         bool verificaUltimo = (pessoasSelecionadas.length == tamanhoTime);
 
         if (((somaNiveisTime - somaNiveisDesejada).abs() <=
@@ -50,15 +64,22 @@ class _SorteioPageState extends State<SorteioPage> {
               (pessoasSelecionadas) => time.contains(pessoasSelecionadas));
         } else {
           i--;
+          final coringas =
+              pessoasSelecionadas.where((pessoa) => pessoa.coringa).toList();
           pessoasSelecionadas.shuffle(random);
+          pessoasSelecionadas.removeWhere(
+              (pessoasSelecionadas) => coringas.contains(pessoasSelecionadas));
+          for (int i = 0; i < coringas.length; i++) {
+            pessoasSelecionadas.insert(i * tamanhoTime, coringas[i]);
+          }
         }
         if (sorteados.length == numTimes) {
           deuCerto = true;
           break;
         }
       }
-      print(sorteados);
     }
+    sorteados.shuffle(random);
     return sorteados;
   }
 
@@ -75,48 +96,103 @@ class _SorteioPageState extends State<SorteioPage> {
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.fromLTRB(16, 2, 0, 8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Quantidade de pessoas por time:',
-              style: TextStyle(fontSize: 16),
+            Row(
+              children: [
+                const Text(
+                  'Quantidade de pessoas por time:',
+                  style: TextStyle(fontSize: 16),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 10.0),
+                  child: DropdownButton<int>(
+                    value: pessoasPorTime,
+                    onChanged: (newValue) {
+                      setState(() {
+                        pessoasPorTime = newValue!;
+                      });
+                    },
+                    items: List.generate(14, (index) => index + 2)
+                        .map((value) => DropdownMenuItem<int>(
+                              value: value,
+                              child: Text(value.toString()),
+                            ))
+                        .toList(),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 25.0),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if (widget.list.isEmpty ||
+                          ((widget.qtdSelecionada % pessoasPorTime) > 0) ||
+                          widget.qtdCoringas < pessoasPorTime) {
+                        showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return const AlertDialog(
+                                title: Text(
+                                    'Valor Inválido!\nUm ou mais desses problemas foram encontrados'),
+                                content: Text(
+                                    '>> Lista ta vazia\n>> Vai ter time com pouca pessoa\n>> Mais capitães que times.\n\n!!calcula direito ai meu fi :(  !!'),
+                              );
+                            });
+                      } else {
+                        times = gerarTimes(widget.list, pessoasPorTime);
+                        setState(() {});
+                      }
+                    },
+                    child: const Text('Sortear'),
+                  ),
+                ),
+              ],
             ),
-            DropdownButton<int>(
-              value: pessoasPorTime,
-              onChanged: (newValue) {
-                setState(() {
-                  pessoasPorTime = newValue!;
-                });
-              },
-              items: List.generate(14, (index) => index + 2)
-                  .map((value) => DropdownMenuItem<int>(
-                        value: value,
-                        child: Text(value.toString()),
-                      ))
-                  .toList(),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () => gerarTimes(widget.list, pessoasPorTime),
-              child: const Text('Sortear'),
-            ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 5),
             const Text(
               'Pessoas sorteadas:',
               style: TextStyle(fontSize: 16),
             ),
-            // Expanded(
-            //   child: ListView.builder(
-            //     itemCount: pessoasSorteadas.length,
-            //     itemBuilder: (context, index) {
-            //       return ListTile(
-            //         title: Text(pessoasSorteadas[index]),
-            //       );
-            //     },
-            //   ),
-            // ),
+            Expanded(
+              child: times.isEmpty
+                  ? const Text("nada a exibir")
+                  : ListView.builder(
+                      itemCount: times.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        final time = times[index];
+                        final somaEstrelasTime =
+                            time.fold(0, (soma, pessoa) => soma + pessoa.nivel);
+
+                        return Card(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text(
+                                  'Time ${index + 1}: $somaEstrelasTime',
+                                  style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              for (final pessoa in time)
+                                ListTile(
+                                  title: Text("${pessoa.nome}",
+                                      style: TextStyle(
+                                          color: pessoa.coringa
+                                              ? Colors.pink
+                                              : Colors.black)),
+                                  subtitle: Text("${pessoa.nivel}"),
+                                ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+            )
           ],
         ),
       ),
