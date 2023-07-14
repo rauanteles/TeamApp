@@ -21,27 +21,45 @@ class _SorteioPageState extends State<SorteioPage> {
         List<Pessoa>.from(pessoas.where((pessoa) => pessoa.selecionado));
     final random = Random();
     final times = <List<Pessoa>>[];
-    final somaTotalNiveis = pessoasSelecionadas.fold(
-        0.0, (soma, pessoa) => soma + (pessoa.nivel ?? 0.0));
+    final numTimes = (pessoasSelecionadas.length / tamanhoTime).ceil();
+    final somaTotalNiveis =
+        pessoasSelecionadas.fold(0.0, (soma, pessoa) => soma + pessoa.nivel!);
+    final somaNiveisDesejada = somaTotalNiveis / numTimes;
+    var somaNiveisTime = double.infinity;
+    bool deuCerto = false;
+    List<List<Pessoa>> sorteados = [];
 
-    while (pessoasSelecionadas.isNotEmpty) {
-      final time = <Pessoa>[];
-      for (var i = 0; i < tamanhoTime && pessoasSelecionadas.isNotEmpty; i++) {
-        final index = random.nextInt(pessoasSelecionadas.length);
-        final pessoa = pessoasSelecionadas.removeAt(index);
-        time.add(pessoa);
+    while (!deuCerto) {
+      pessoasSelecionadas.shuffle(random);
+      for (var i = 0; i < numTimes; i++) {
+        final time = pessoasSelecionadas.sublist(0, tamanhoTime);
+        times.add(time);
+
+        somaNiveisTime = time.fold(0.0, (soma, pessoa) => soma + pessoa.nivel!);
+        // print("radom: $pessoasSelecionadas");
+        // print('soma times: $somaNiveisTime');
+        // print('diferença: ${somaNiveisTime - somaNiveisDesejada}');
+        // print('deu certo: $deuCerto');
+        // print('lista sorteados = $sorteados');
+        bool verificaUltimo = (pessoasSelecionadas.length == tamanhoTime);
+
+        if (((somaNiveisTime - somaNiveisDesejada).abs() <=
+            (verificaUltimo ? 2 : 0.5))) {
+          sorteados.add(time);
+          pessoasSelecionadas.removeWhere(
+              (pessoasSelecionadas) => time.contains(pessoasSelecionadas));
+        } else {
+          i--;
+          pessoasSelecionadas.shuffle(random);
+        }
+        if (sorteados.length == numTimes) {
+          deuCerto = true;
+          break;
+        }
       }
-
-      times.add(time);
-      final somaTimes = somaTotalNiveis ~/ time.length;
-      print(somaTimes);
+      print(sorteados);
     }
-
-    print(somaTotalNiveis);
-    print(times.length);
-    print(times);
-
-    return times;
+    return sorteados;
   }
 
   @override
