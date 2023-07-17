@@ -195,7 +195,7 @@ class _PessoaListState extends State<PessoaList> {
       },
       onDoubleTap: () {
         cd.coringa = !cd.coringa;
-        qtdCoringas++;
+        cd.coringa ? qtdCoringas++ : qtdCoringas--;
         setState(() {});
       },
       // -----------------------------------------------------------------------
@@ -210,7 +210,7 @@ class _PessoaListState extends State<PessoaList> {
               onPressed: ((context) {
                 removePessoa(cd.id!);
                 cd.selecionado ? qtdSelecionada-- : null;
-                cd.coringa ? qtdCoringas++ : null;
+                cd.coringa ? qtdCoringas-- : null;
               }),
               backgroundColor: const Color(0xFFFE4A49),
               foregroundColor: Colors.white,

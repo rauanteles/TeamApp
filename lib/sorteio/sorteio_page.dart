@@ -19,14 +19,9 @@ class _SorteioPageState extends State<SorteioPage> {
   var times = [];
   int pessoasPorTime = 2;
 
-  bool verificaCoringa(List<Pessoa> time, List<Pessoa> coringas) {
-    return time.any((pessoa) => coringas.contains(pessoa));
-  }
-
   List<List<Pessoa>> gerarTimes(List<Pessoa> pessoas, int tamanhoTime) {
     final pessoasSelecionadas =
         List<Pessoa>.from(pessoas.where((pessoa) => pessoa.selecionado));
-
     final random = Random();
     final times = <List<Pessoa>>[];
     final numTimes = (pessoasSelecionadas.length / tamanhoTime).ceil();
@@ -36,13 +31,19 @@ class _SorteioPageState extends State<SorteioPage> {
     var somaNiveisTime = double.infinity;
     bool deuCerto = false;
     List<List<Pessoa>> sorteados = [];
+    List<Pessoa> organizaCoringa =
+        pessoasSelecionadas.where((pessoa) => pessoa.coringa).toList();
+    pessoasSelecionadas.shuffle(random);
+    pessoasSelecionadas.removeWhere(
+        (pessoasSelecionadas) => organizaCoringa.contains(pessoasSelecionadas));
+    List<Pessoa> poucaEstrela =
+        pessoasSelecionadas.where((pessoa) => (pessoa.nivel! <= 1)).toList();
+    final numeroPoucaEstrela =
+        poucaEstrela.fold(0.0, (soma, pessoa) => soma + pessoa.nivel!);
 
     while (!deuCerto) {
-      final coringas =
-          pessoasSelecionadas.where((pessoa) => pessoa.coringa).toList();
-      pessoasSelecionadas.shuffle(random);
-      pessoasSelecionadas.removeWhere(
-          (pessoasSelecionadas) => coringas.contains(pessoasSelecionadas));
+      final coringas = organizaCoringa;
+
       for (int i = 0; i < coringas.length; i++) {
         pessoasSelecionadas.insert(i * tamanhoTime, coringas[i]);
       }
@@ -55,20 +56,20 @@ class _SorteioPageState extends State<SorteioPage> {
 
         somaNiveisTime = time.fold(0.0, (soma, pessoa) => soma + pessoa.nivel!);
 
-        bool verificaUltimo = (pessoasSelecionadas.length == tamanhoTime);
+        print(somaNiveisDesejada - somaNiveisTime);
 
-        if (((somaNiveisTime - somaNiveisDesejada).abs() <=
-            (verificaUltimo ? 2 : 0.5))) {
+        bool verificaUltimo = (pessoasSelecionadas.length == tamanhoTime) ||
+            ((somaNiveisDesejada - somaNiveisTime).abs() >= 1) ||
+            (numeroPoucaEstrela <= (pessoasSelecionadas.length * 4 / 5));
+
+        if ((somaNiveisTime - somaNiveisDesejada).abs() <=
+            (verificaUltimo ? 10 : 0.5)) {
           sorteados.add(time);
           pessoasSelecionadas.removeWhere(
               (pessoasSelecionadas) => time.contains(pessoasSelecionadas));
         } else {
           i--;
-          final coringas =
-              pessoasSelecionadas.where((pessoa) => pessoa.coringa).toList();
-          pessoasSelecionadas.shuffle(random);
-          pessoasSelecionadas.removeWhere(
-              (pessoasSelecionadas) => coringas.contains(pessoasSelecionadas));
+          final coringas = organizaCoringa;
           for (int i = 0; i < coringas.length; i++) {
             pessoasSelecionadas.insert(i * tamanhoTime, coringas[i]);
           }
@@ -79,6 +80,7 @@ class _SorteioPageState extends State<SorteioPage> {
         }
       }
     }
+
     sorteados.shuffle(random);
     return sorteados;
   }
@@ -127,9 +129,10 @@ class _SorteioPageState extends State<SorteioPage> {
                   padding: const EdgeInsets.only(left: 25.0),
                   child: ElevatedButton(
                     onPressed: () {
+                      final numTimes = widget.qtdSelecionada / pessoasPorTime;
                       if (widget.list.isEmpty ||
                           ((widget.qtdSelecionada % pessoasPorTime) > 0) ||
-                          widget.qtdCoringas < pessoasPorTime) {
+                          widget.qtdCoringas > numTimes) {
                         showDialog(
                             context: context,
                             builder: (BuildContext context) {
@@ -151,13 +154,9 @@ class _SorteioPageState extends State<SorteioPage> {
               ],
             ),
             const SizedBox(height: 5),
-            const Text(
-              'Pessoas sorteadas:',
-              style: TextStyle(fontSize: 16),
-            ),
             Expanded(
               child: times.isEmpty
-                  ? const Text("nada a exibir")
+                  ? const Text("")
                   : ListView.builder(
                       itemCount: times.length,
                       itemBuilder: (BuildContext context, int index) {
@@ -171,21 +170,49 @@ class _SorteioPageState extends State<SorteioPage> {
                             children: [
                               Padding(
                                 padding: const EdgeInsets.all(8.0),
-                                child: Text(
-                                  'Time ${index + 1}: $somaEstrelasTime',
-                                  style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold),
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      'Time ${index + 1}:',
+                                      style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 8.0),
+                                      child: Text(
+                                        '$somaEstrelasTime',
+                                        style: const TextStyle(
+                                            color: Colors.grey, fontSize: 18),
+                                      ),
+                                    )
+                                  ],
                                 ),
                               ),
                               for (final pessoa in time)
                                 ListTile(
-                                  title: Text("${pessoa.nome}",
-                                      style: TextStyle(
-                                          color: pessoa.coringa
-                                              ? Colors.pink
-                                              : Colors.black)),
-                                  subtitle: Text("${pessoa.nivel}"),
+                                  title: Row(
+                                    children: [
+                                      Text(
+                                        "${pessoa.nome}",
+                                        style: TextStyle(
+                                            color: pessoa.coringa
+                                                ? Colors.pink
+                                                : Colors.black),
+                                      ),
+                                      Padding(
+                                        padding:
+                                            const EdgeInsets.only(left: 8.0),
+                                        child: Text(
+                                          "${pessoa.nivel}",
+                                          style: TextStyle(
+                                              color: pessoa.coringa
+                                                  ? Colors.purple
+                                                  : Colors.grey),
+                                        ),
+                                      )
+                                    ],
+                                  ),
                                 ),
                             ],
                           ),
