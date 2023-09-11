@@ -20,26 +20,29 @@ class _SorteioPageState extends State<SorteioPage> {
   int pessoasPorTime = 2;
 
   List<List<Pessoa>> gerarTimes(List<Pessoa> pessoas, int tamanhoTime) {
+    final times = <List<Pessoa>>[];
+    List<List<Pessoa>> sorteados = [];
+
     final pessoasSelecionadas =
         List<Pessoa>.from(pessoas.where((pessoa) => pessoa.selecionado));
+
     final random = Random();
-    final times = <List<Pessoa>>[];
+
     final numTimes = (pessoasSelecionadas.length / tamanhoTime).ceil();
+
     final somaTotalNiveis =
         pessoasSelecionadas.fold(0.0, (soma, pessoa) => soma + pessoa.nivel!);
-    final somaNiveisDesejada = somaTotalNiveis / numTimes;
+
+    final somaNiveisDesejada = (somaTotalNiveis / numTimes).abs().floor();
+
     var somaNiveisTime = double.infinity;
+
     bool deuCerto = false;
-    List<List<Pessoa>> sorteados = [];
     List<Pessoa> organizaCoringa =
         pessoasSelecionadas.where((pessoa) => pessoa.coringa).toList();
     pessoasSelecionadas.shuffle(random);
     pessoasSelecionadas.removeWhere(
         (pessoasSelecionadas) => organizaCoringa.contains(pessoasSelecionadas));
-    List<Pessoa> poucaEstrela =
-        pessoasSelecionadas.where((pessoa) => (pessoa.nivel! <= 1)).toList();
-    final numeroPoucaEstrela =
-        poucaEstrela.fold(0.0, (soma, pessoa) => soma + pessoa.nivel!);
 
     while (!deuCerto) {
       final coringas = organizaCoringa;
@@ -47,7 +50,6 @@ class _SorteioPageState extends State<SorteioPage> {
       for (int i = 0; i < coringas.length; i++) {
         pessoasSelecionadas.insert(i * tamanhoTime, coringas[i]);
       }
-      print(pessoasSelecionadas);
 
       for (var i = 0; i < numTimes; i++) {
         final time = pessoasSelecionadas.sublist(0, tamanhoTime);
@@ -55,24 +57,24 @@ class _SorteioPageState extends State<SorteioPage> {
         times.add(time);
 
         somaNiveisTime = time.fold(0.0, (soma, pessoa) => soma + pessoa.nivel!);
-
-        print(somaNiveisDesejada - somaNiveisTime);
-
-        bool verificaUltimo = (pessoasSelecionadas.length == tamanhoTime) ||
-            ((somaNiveisDesejada - somaNiveisTime).abs() >= 1) ||
-            (numeroPoucaEstrela <= (pessoasSelecionadas.length * 4 / 5));
+        print(coringas);
+        bool verificaUltimo = i == 3;
+        print("DESEJADA: $somaNiveisDesejada");
+        print("TIMES: $times");
+        print("TIME: $time");
+        print("ULTIMO: ${verificaUltimo ? "SIM" : "NAO"}");
+        print("SOMA TIME: $somaNiveisTime");
 
         if ((somaNiveisTime - somaNiveisDesejada).abs() <=
-            (verificaUltimo ? 10 : 0.5)) {
+            ((verificaUltimo) ? 100 : 1.5)) {
           sorteados.add(time);
+          print("SORTEADOS: $sorteados");
           pessoasSelecionadas.removeWhere(
               (pessoasSelecionadas) => time.contains(pessoasSelecionadas));
         } else {
+          print("REINICIANDO");
           i--;
-          final coringas = organizaCoringa;
-          for (int i = 0; i < coringas.length; i++) {
-            pessoasSelecionadas.insert(i * tamanhoTime, coringas[i]);
-          }
+          pessoasSelecionadas.shuffle();
         }
         if (sorteados.length == numTimes) {
           deuCerto = true;
@@ -82,6 +84,7 @@ class _SorteioPageState extends State<SorteioPage> {
     }
 
     sorteados.shuffle(random);
+
     return sorteados;
   }
 
@@ -191,6 +194,7 @@ class _SorteioPageState extends State<SorteioPage> {
                               ),
                               for (final pessoa in time)
                                 ListTile(
+                                  dense: true,
                                   title: Row(
                                     children: [
                                       Text(

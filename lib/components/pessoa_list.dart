@@ -114,7 +114,10 @@ class _PessoaListState extends State<PessoaList> {
                 return cardModel(c);
               },
             ),
-          )
+          ),
+          const SizedBox(
+            height: 28,
+          ),
         ],
       ),
       // ---------------------------------------------------------------------
@@ -582,10 +585,19 @@ class _PessoaListState extends State<PessoaList> {
                           padding: const EdgeInsets.all(8.0),
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
                               const Text(
-                                'Confirma apagar os jogadores da lista atual?',
+                                'Esse Processo irá apagar todos os jogadores da lista atual!',
+                                style: TextStyle(fontSize: 20),
+                              ),
+                              const Text(
+                                ' ',
+                                style: TextStyle(fontSize: 20),
+                              ),
+                              const Text(
+                                'Deseja continuar?',
                                 style: TextStyle(fontSize: 20),
                               ),
                               const SizedBox(height: 15),
