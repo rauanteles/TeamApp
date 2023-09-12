@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import '../models/pessoa.dart';
 
 class SorteioPage extends StatefulWidget {
+  final int qtdCoringas;
   final List<Pessoa> list;
   final int qtdSelecionada;
-  final int qtdCoringas;
   const SorteioPage(this.list, this.qtdSelecionada, this.qtdCoringas,
       {super.key});
 
@@ -19,62 +19,79 @@ class _SorteioPageState extends State<SorteioPage> {
   var times = [];
   int pessoasPorTime = 2;
 
-  List<List<Pessoa>> gerarTimes(List<Pessoa> pessoas, int tamanhoTime) {
-    final times = <List<Pessoa>>[];
-    List<List<Pessoa>> sorteados = [];
+  bool verificaCoringa(List<Pessoa> time, List<Pessoa> coringas) {
+    return time.any((pessoa) => coringas.contains(pessoa));
+  }
 
+  List<List<Pessoa>> gerarTimes(List<Pessoa> pessoas, int tamanhoTime) {
     final pessoasSelecionadas =
         List<Pessoa>.from(pessoas.where((pessoa) => pessoa.selecionado));
 
     final random = Random();
+
+    final times = <List<Pessoa>>[];
 
     final numTimes = (pessoasSelecionadas.length / tamanhoTime).ceil();
 
     final somaTotalNiveis =
         pessoasSelecionadas.fold(0.0, (soma, pessoa) => soma + pessoa.nivel!);
 
-    final somaNiveisDesejada = (somaTotalNiveis / numTimes).abs().floor();
+    final somaNiveisDesejada = somaTotalNiveis / numTimes;
 
     var somaNiveisTime = double.infinity;
 
     bool deuCerto = false;
+    List<List<Pessoa>> sorteados = [];
     List<Pessoa> organizaCoringa =
         pessoasSelecionadas.where((pessoa) => pessoa.coringa).toList();
     pessoasSelecionadas.shuffle(random);
     pessoasSelecionadas.removeWhere(
         (pessoasSelecionadas) => organizaCoringa.contains(pessoasSelecionadas));
 
+    print("Coringas: $organizaCoringa");
+
     while (!deuCerto) {
+      print("PASSOU WHILE");
+      pessoasSelecionadas.shuffle(random);
       final coringas = organizaCoringa;
 
       for (int i = 0; i < coringas.length; i++) {
         pessoasSelecionadas.insert(i * tamanhoTime, coringas[i]);
       }
+      print("Lista: $pessoasSelecionadas");
 
       for (var i = 0; i < numTimes; i++) {
+        print("PASSOU FOR");
         final time = pessoasSelecionadas.sublist(0, tamanhoTime);
+        //final coringas = time.where((pessoa) => pessoa.coringa).toList();
 
         times.add(time);
 
         somaNiveisTime = time.fold(0.0, (soma, pessoa) => soma + pessoa.nivel!);
-        print(coringas);
-        bool verificaUltimo = i == 3;
-        print("DESEJADA: $somaNiveisDesejada");
-        print("TIMES: $times");
-        print("TIME: $time");
-        print("ULTIMO: ${verificaUltimo ? "SIM" : "NAO"}");
-        print("SOMA TIME: $somaNiveisTime");
 
-        if ((somaNiveisTime - somaNiveisDesejada).abs() <=
-            ((verificaUltimo) ? 100 : 1.5)) {
+        bool verificaUltimo = (pessoasSelecionadas.length == tamanhoTime);
+        print("LISTA VERIFICAR: $time");
+
+        if (((somaNiveisTime - somaNiveisDesejada).abs() <=
+            (verificaUltimo ? 3 : 0.5))) {
+          //if (time.any((pessoa) => coringas.contains(pessoa))) {}
           sorteados.add(time);
-          print("SORTEADOS: $sorteados");
           pessoasSelecionadas.removeWhere(
               (pessoasSelecionadas) => time.contains(pessoasSelecionadas));
+          coringas.removeWhere((coringas) => time.contains(coringas));
+          print("coringas novo: $coringas");
+
+          print("ENTROU: $time");
         } else {
-          print("REINICIANDO");
+          print("NAO ENTROU");
           i--;
-          pessoasSelecionadas.shuffle();
+          pessoasSelecionadas.shuffle(random);
+
+          pessoasSelecionadas.removeWhere(
+              (pessoasSelecionadas) => coringas.contains(pessoasSelecionadas));
+          for (int i = 0; i < coringas.length; i++) {
+            pessoasSelecionadas.insert(i * tamanhoTime, coringas[i]);
+          }
         }
         if (sorteados.length == numTimes) {
           deuCerto = true;
@@ -82,9 +99,7 @@ class _SorteioPageState extends State<SorteioPage> {
         }
       }
     }
-
     sorteados.shuffle(random);
-
     return sorteados;
   }
 
@@ -132,18 +147,15 @@ class _SorteioPageState extends State<SorteioPage> {
                   padding: const EdgeInsets.only(left: 25.0),
                   child: ElevatedButton(
                     onPressed: () {
-                      final numTimes = widget.qtdSelecionada / pessoasPorTime;
                       if (widget.list.isEmpty ||
-                          ((widget.qtdSelecionada % pessoasPorTime) > 0) ||
-                          widget.qtdCoringas > numTimes) {
+                          ((widget.qtdSelecionada % pessoasPorTime) > 0)) {
                         showDialog(
                             context: context,
                             builder: (BuildContext context) {
                               return const AlertDialog(
-                                title: Text(
-                                    'Valor Inválido!\nUm ou mais desses problemas foram encontrados'),
+                                title: Text('Valor Inválido!'),
                                 content: Text(
-                                    '>> Lista ta vazia\n>> Vai ter time com pouca pessoa\n>> Mais capitães que times.\n\n!!calcula direito ai meu fi :(  !!'),
+                                    'Ou a lista ta vazia ou vai ter time com pouca pessoa, calcula direito ai meu fi :('),
                               );
                             });
                       } else {
@@ -157,9 +169,13 @@ class _SorteioPageState extends State<SorteioPage> {
               ],
             ),
             const SizedBox(height: 5),
+            const Text(
+              'Pessoas sorteadas:',
+              style: TextStyle(fontSize: 16),
+            ),
             Expanded(
               child: times.isEmpty
-                  ? const Text("")
+                  ? const Text("nada a exibir")
                   : ListView.builder(
                       itemCount: times.length,
                       itemBuilder: (BuildContext context, int index) {
@@ -171,52 +187,35 @@ class _SorteioPageState extends State<SorteioPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Row(
-                                  children: [
-                                    Text(
+                              Row(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text(
                                       'Time ${index + 1}:',
                                       style: const TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.bold),
                                     ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(left: 8.0),
-                                      child: Text(
-                                        '$somaEstrelasTime',
-                                        style: const TextStyle(
-                                            color: Colors.grey, fontSize: 18),
-                                      ),
-                                    )
-                                  ],
-                                ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 8.0),
+                                    child: Text(
+                                      '$somaEstrelasTime',
+                                      style: const TextStyle(
+                                          color: Colors.grey, fontSize: 18),
+                                    ),
+                                  ),
+                                ],
                               ),
                               for (final pessoa in time)
                                 ListTile(
-                                  dense: true,
-                                  title: Row(
-                                    children: [
-                                      Text(
-                                        "${pessoa.nome}",
-                                        style: TextStyle(
-                                            color: pessoa.coringa
-                                                ? Colors.pink
-                                                : Colors.black),
-                                      ),
-                                      Padding(
-                                        padding:
-                                            const EdgeInsets.only(left: 8.0),
-                                        child: Text(
-                                          "${pessoa.nivel}",
-                                          style: TextStyle(
-                                              color: pessoa.coringa
-                                                  ? Colors.purple
-                                                  : Colors.grey),
-                                        ),
-                                      )
-                                    ],
-                                  ),
+                                  title: Text("${pessoa.nome}",
+                                      style: TextStyle(
+                                          color: pessoa.coringa
+                                              ? Colors.pink
+                                              : Colors.black)),
+                                  subtitle: Text("${pessoa.nivel}"),
                                 ),
                             ],
                           ),
