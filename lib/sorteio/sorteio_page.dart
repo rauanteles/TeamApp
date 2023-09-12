@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 
 import '../models/pessoa.dart';
 
+import 'package:flutter/services.dart';
+
 class SorteioPage extends StatefulWidget {
   final int qtdCoringas;
   final List<Pessoa> list;
@@ -18,14 +20,26 @@ class SorteioPage extends StatefulWidget {
 class _SorteioPageState extends State<SorteioPage> {
   var times = [];
   int pessoasPorTime = 2;
-
+  String listaCopiar = "";
   bool verificaCoringa(List<Pessoa> time, List<Pessoa> coringas) {
     return time.any((pessoa) => coringas.contains(pessoa));
+  }
+
+  void copyToClipboard(String text) {
+    Clipboard.setData(ClipboardData(text: text));
+    final snackBar = SnackBar(
+      content: Text('Texto copiado para a área de transferência'),
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
   List<List<Pessoa>> gerarTimes(List<Pessoa> pessoas, int tamanhoTime) {
     final pessoasSelecionadas =
         List<Pessoa>.from(pessoas.where((pessoa) => pessoa.selecionado));
+    //print("SIM SELECT: $pessoasSelecionadas");
+    // final pessoasNaoSelecionadas =
+    List<Pessoa>.from(pessoas.where((pessoa) => pessoa.selecionado));
+    // print("NAO SELECT: $pessoasNaoSelecionadas");
 
     final random = Random();
 
@@ -48,20 +62,15 @@ class _SorteioPageState extends State<SorteioPage> {
     pessoasSelecionadas.removeWhere(
         (pessoasSelecionadas) => organizaCoringa.contains(pessoasSelecionadas));
 
-    print("Coringas: $organizaCoringa");
-
     while (!deuCerto) {
-      print("PASSOU WHILE");
       pessoasSelecionadas.shuffle(random);
       final coringas = organizaCoringa;
 
       for (int i = 0; i < coringas.length; i++) {
         pessoasSelecionadas.insert(i * tamanhoTime, coringas[i]);
       }
-      print("Lista: $pessoasSelecionadas");
 
       for (var i = 0; i < numTimes; i++) {
-        print("PASSOU FOR");
         final time = pessoasSelecionadas.sublist(0, tamanhoTime);
         //final coringas = time.where((pessoa) => pessoa.coringa).toList();
 
@@ -70,7 +79,6 @@ class _SorteioPageState extends State<SorteioPage> {
         somaNiveisTime = time.fold(0.0, (soma, pessoa) => soma + pessoa.nivel!);
 
         bool verificaUltimo = (pessoasSelecionadas.length == tamanhoTime);
-        print("LISTA VERIFICAR: $time");
 
         if (((somaNiveisTime - somaNiveisDesejada).abs() <=
             (verificaUltimo ? 3 : 0.5))) {
@@ -79,11 +87,7 @@ class _SorteioPageState extends State<SorteioPage> {
           pessoasSelecionadas.removeWhere(
               (pessoasSelecionadas) => time.contains(pessoasSelecionadas));
           coringas.removeWhere((coringas) => time.contains(coringas));
-          print("coringas novo: $coringas");
-
-          print("ENTROU: $time");
         } else {
-          print("NAO ENTROU");
           i--;
           pessoasSelecionadas.shuffle(random);
 
@@ -103,6 +107,18 @@ class _SorteioPageState extends State<SorteioPage> {
     return sorteados;
   }
 
+  String formataTimes(List<dynamic> times) {
+    String result = '';
+
+    for (int i = 0; i < times.length; i++) {
+      result += '*TIME ${i + 1}*\n';
+      result += times[i].map((num) => num.toString()).join('\n');
+      result += '\n\n';
+    }
+
+    return result;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -114,6 +130,14 @@ class _SorteioPageState extends State<SorteioPage> {
             Navigator.pop(context);
           },
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.copy),
+            onPressed: () {
+              copyToClipboard(listaCopiar);
+            },
+          )
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.fromLTRB(16, 2, 0, 8),
@@ -160,7 +184,10 @@ class _SorteioPageState extends State<SorteioPage> {
                             });
                       } else {
                         times = gerarTimes(widget.list, pessoasPorTime);
+                        String formatado = formataTimes(times);
+                        listaCopiar = formatado;
                         setState(() {});
+                        print(formatado);
                       }
                     },
                     child: const Text('Sortear'),
@@ -210,6 +237,9 @@ class _SorteioPageState extends State<SorteioPage> {
                               ),
                               for (final pessoa in time)
                                 ListTile(
+                                  dense: true,
+                                  visualDensity: const VisualDensity(
+                                      horizontal: 0, vertical: -4),
                                   title: Text("${pessoa.nome}",
                                       style: TextStyle(
                                           color: pessoa.coringa
