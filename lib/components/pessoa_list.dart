@@ -8,6 +8,7 @@ import 'package:groupapp/components/pessoa_form.dart';
 
 import '../models/pessoa.dart';
 import '../sorteio/sorteio_page.dart';
+import 'contador/contador_pontos.dart';
 
 class PessoaList extends StatefulWidget {
   const PessoaList({super.key});
@@ -50,43 +51,59 @@ class _PessoaListState extends State<PessoaList> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               SizedBox(
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 20.0),
-                  child: Text(
-                    'Total: ${pessoas.length} ',
-                  ),
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 20.0),
+                      child: Text(
+                        'Total: ${pessoas.length} ',
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 20.0),
+                      child: Text(
+                        'Selec.: $qtdSelecionada',
+                        textAlign: TextAlign.end,
+                      ),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(
                 height: 20,
               ),
               Padding(
-                padding: const EdgeInsets.all(5.0),
+                padding: const EdgeInsets.fromLTRB(2, 5, 5, 5),
                 child: SizedBox(
                   height: 35,
-                  width: 170,
+                  width: 230,
                   child: TextField(
                     controller: controller,
                     decoration: const InputDecoration(
-                        hintText: "Pesquisar",
-                        hintStyle: TextStyle(height: 3.2),
-                        prefixIcon: Icon(Icons.search),
-                        border: OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(25.0)))),
+                      hintText: "Pesquisar",
+                      hintStyle: TextStyle(height: 3.2),
+                      prefixIcon: Icon(Icons.search),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(25.0),
+                        ),
+                      ),
+                    ),
                     onChanged: (value) {
                       pesquisaPessoa(value);
                     },
                   ),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.only(right: 10.0),
-                child: Text(
-                  'Selecionados: $qtdSelecionada',
-                  textAlign: TextAlign.end,
-                ),
-              ),
+              SizedBox(
+                child: IconButton(
+                    onPressed: () {
+                      contadorPontos();
+                    },
+                    icon: const Icon(
+                      Icons.emoji_events,
+                    )),
+              )
             ],
           ),
           const Padding(
@@ -305,6 +322,16 @@ class _PessoaListState extends State<PessoaList> {
   //----------------------------------------------------------------------------
   //----------------------------FUNÇÕES-----------------------------------------
   //----------------------------------------------------------------------------
+
+  //ABRIR PAGINA CONTADOR DE PONTOS
+  contadorPontos() {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ContadorPage(),
+        ));
+  }
+
   //ABRIR PAGINA DE SORTEIO
   pageSorteio(pessoas) {
     Navigator.push(

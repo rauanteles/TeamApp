@@ -27,19 +27,23 @@ class _SorteioPageState extends State<SorteioPage> {
 
   void copyToClipboard(String text) {
     Clipboard.setData(ClipboardData(text: text));
-    final snackBar = SnackBar(
+    const snackBar = SnackBar(
       content: Text('Texto copiado para a área de transferência'),
     );
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
   List<List<Pessoa>> gerarTimes(List<Pessoa> pessoas, int tamanhoTime) {
-    final pessoasSelecionadas =
+    var pessoasSelecionadas =
         List<Pessoa>.from(pessoas.where((pessoa) => pessoa.selecionado));
-    //print("SIM SELECT: $pessoasSelecionadas");
-    // final pessoasNaoSelecionadas =
-    List<Pessoa>.from(pessoas.where((pessoa) => pessoa.selecionado));
-    // print("NAO SELECT: $pessoasNaoSelecionadas");
+    print("SIM SELECT: $pessoasSelecionadas");
+    final pessoasNaoSelecionadas = List<Pessoa>.from(
+        pessoas.where((pessoa) => pessoa.selecionado == false));
+    print("NAO SELECT: $pessoasNaoSelecionadas");
+
+    if (pessoasSelecionadas.isEmpty || pessoasSelecionadas == 0) {
+      pessoasSelecionadas = pessoasNaoSelecionadas;
+    }
 
     final random = Random();
 
@@ -112,6 +116,7 @@ class _SorteioPageState extends State<SorteioPage> {
 
     for (int i = 0; i < times.length; i++) {
       result += '*TIME ${i + 1}*\n';
+      // ignore: avoid_types_as_parameter_names
       result += times[i].map((num) => num.toString()).join('\n');
       result += '\n\n';
     }
@@ -187,7 +192,6 @@ class _SorteioPageState extends State<SorteioPage> {
                         String formatado = formataTimes(times);
                         listaCopiar = formatado;
                         setState(() {});
-                        print(formatado);
                       }
                     },
                     child: const Text('Sortear'),
